@@ -1,0 +1,147 @@
+spring:
+  profiles:
+    active: dev
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: America/Sao_Paulo
+    open-in-view: false
+
+  # Flyway Configuration
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:minha-chave-secreta-super-segura-para-desenvolvimento-local-que-deve-ser-alterada-em-producao}
+  expiration: 86400000 # 24 hours in milliseconds
+  refresh-expiration: 604800000 # 7 days in milliseconds
+
+# File Storage Configuration
+file:
+  upload-dir: ${FILE_UPLOAD_DIR:./uploads}
+
+# Logging Configuration
+logging:
+  level:
+    com.sindicato: INFO
+    org.springframework.security: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sindicato_rural_dev
+    username: ${DB_USERNAME:sindicato_user}
+    password: ${DB_PASSWORD:sindicato_pass}
+    driver-class-name: org.postgresql.Driver
+    
+    # Connection Pool Configuration (HikariCP)
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      leak-detection-threshold: 60000
+      pool-name: SindicatoHikariCP-Dev
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  # H2 Console for development (optional)
+  h2:
+    console:
+      enabled: false
+
+logging:
+  level:
+    com.sindicato: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: prod
+  
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:sindicato_rural}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    
+    # Connection Pool Configuration (HikariCP) - Production optimized
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 10
+      idle-timeout: 600000
+      connection-timeout: 30000
+      leak-detection-threshold: 60000
+      pool-name: SindicatoHikariCP-Prod
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+logging:
+  level:
+    com.sindicato: INFO
+    org.springframework.security: WARN
+    org.hibernate: WARN
+  file:
+    name: logs/sindicato-rural.log
+
+---
+# Test Profile
+spring:
+  config:
+    activate:
+      on-profile: test
+  
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  h2:
+    console:
+      enabled: true
+
+logging:
+  level:
+    com.sindicato: DEBUG

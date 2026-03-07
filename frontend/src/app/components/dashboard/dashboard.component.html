@@ -1,0 +1,38 @@
+<mat-toolbar color="primary">
+  <span>Sistema Sindicato Rural</span>
+  <span class="spacer"></span>
+  <span class="user-name">{{ userName }}</span>
+  <button mat-icon-button (click)="logout()">
+    <mat-icon>logout</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav mode="side" opened class="sidenav">
+    <mat-nav-list>
+      <a mat-list-item>
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Dashboard</span>
+      </a>
+      <a mat-list-item>
+        <mat-icon matListItemIcon>people</mat-icon>
+        <span matListItemTitle>Sócios</span>
+      </a>
+      <a mat-list-item>
+        <mat-icon matListItemIcon>payment</mat-icon>
+        <span matListItemTitle>Pagamentos</span>
+      </a>
+      <a mat-list-item>
+        <mat-icon matListItemIcon>folder</mat-icon>
+        <span matListItemTitle>Arquivos</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="content">
+    <div class="content-wrapper">
+      <h1>Bem-vindo ao Sistema de Gerenciamento</h1>
+      <p>Selecione uma opção no menu lateral para começar.</p>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

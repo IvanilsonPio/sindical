@@ -1,0 +1,39 @@
+.spacer {
+  flex: 1 1 auto;
+}
+
+.user-name {
+  margin-right: 1rem;
+}
+
+.sidenav-container {
+  height: calc(100vh - 64px);
+}
+
+.sidenav {
+  width: 250px;
+  padding-top: 1rem;
+}
+
+.content {
+  padding: 2rem;
+}
+
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .sidenav {
+    width: 200px;
+  }
+  
+  .content {
+    padding: 1rem;
+  }
+  
+  .user-name {
+    display: none;
+  }
+}

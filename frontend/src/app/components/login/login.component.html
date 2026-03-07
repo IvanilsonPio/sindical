@@ -1,0 +1,33 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>Sistema Sindicato Rural</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Usuário</mat-label>
+          <input matInput formControlName="username" autocomplete="username">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Senha</mat-label>
+          <input matInput type="password" formControlName="password" autocomplete="current-password">
+        </mat-form-field>
+
+        @if (error) {
+          <div class="error-message">{{ error }}</div>
+        }
+
+        <button mat-raised-button color="primary" type="submit" 
+                [disabled]="!loginForm.valid || loading" class="full-width">
+          @if (loading) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            Entrar
+          }
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
