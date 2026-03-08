@@ -1,0 +1,186 @@
+<div class="pagamentos-container">
+  <mat-card class="header-card">
+    <mat-card-header>
+      <mat-card-title>
+        <h1>Gestão de Pagamentos</h1>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="actions-row">
+        <button mat-raised-button color="primary" (click)="createPagamento()">
+          <mat-icon>add</mat-icon>
+          Novo Pagamento
+        </button>
+        
+        <mat-slide-toggle 
+          [formControl]="$any(filterForm.get('apenasInadimplentes'))"
+          color="warn"
+          class="inadimplentes-toggle">
+          Apenas Inadimplentes
+        </mat-slide-toggle>
+      </div>
+
+      <form [formGroup]="filterForm" class="filter-form">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Buscar por sócio (nome ou CPF)</mat-label>
+          <input matInput formControlName="socioNome" placeholder="Digite para buscar...">
+          <mat-icon matPrefix>search</mat-icon>
+          <button mat-icon-button matSuffix *ngIf="filterForm.get('socioNome')?.value" 
+                  (click)="filterForm.get('socioNome')?.setValue('')" type="button">
+            <mat-icon>clear</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field-small">
+          <mat-label>Mês</mat-label>
+          <mat-select formControlName="mes">
+            <mat-option [value]="''">Todos</mat-option>
+            <mat-option *ngFor="let mes of meses" [value]="mes.value">
+              {{ mes.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>calendar_today</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field-small">
+          <mat-label>Ano</mat-label>
+          <mat-select formControlName="ano">
+            <mat-option [value]="''">Todos</mat-option>
+            <mat-option *ngFor="let ano of anos" [value]="ano">
+              {{ ano }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>event</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field-small">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option [value]="''">Todos</mat-option>
+            <mat-option *ngFor="let status of statusOptions" [value]="status">
+              {{ status }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>info</mat-icon>
+        </mat-form-field>
+
+        <button mat-raised-button type="button" (click)="clearFilters()" class="clear-button">
+          <mat-icon>clear_all</mat-icon>
+          Limpar Filtros
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="table-card">
+    <mat-card-content>
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+
+      <div *ngIf="!loading && dataSource.data.length === 0" class="empty-state">
+        <mat-icon>receipt_long</mat-icon>
+        <p>Nenhum pagamento encontrado</p>
+        <button mat-raised-button color="primary" (click)="createPagamento()">
+          Registrar Primeiro Pagamento
+        </button>
+      </div>
+
+      <div *ngIf="!loading && dataSource.data.length > 0" class="table-container">
+        <table mat-table [dataSource]="dataSource" class="pagamentos-table">
+          <!-- Número Recibo Column -->
+          <ng-container matColumnDef="numeroRecibo">
+            <th mat-header-cell *matHeaderCellDef>Nº Recibo</th>
+            <td mat-cell *matCellDef="let pagamento">{{ pagamento.numeroRecibo }}</td>
+          </ng-container>
+
+          <!-- Sócio Nome Column -->
+          <ng-container matColumnDef="socioNome">
+            <th mat-header-cell *matHeaderCellDef>Sócio</th>
+            <td mat-cell *matCellDef="let pagamento">{{ pagamento.socioNome }}</td>
+          </ng-container>
+
+          <!-- Sócio CPF Column -->
+          <ng-container matColumnDef="socioCpf">
+            <th mat-header-cell *matHeaderCellDef>CPF</th>
+            <td mat-cell *matCellDef="let pagamento">{{ formatCpf(pagamento.socioCpf) }}</td>
+          </ng-container>
+
+          <!-- Período Column -->
+          <ng-container matColumnDef="periodo">
+            <th mat-header-cell *matHeaderCellDef>Período</th>
+            <td mat-cell *matCellDef="let pagamento">
+              {{ formatPeriodo(pagamento.mes, pagamento.ano) }}
+            </td>
+          </ng-container>
+
+          <!-- Valor Column -->
+          <ng-container matColumnDef="valor">
+            <th mat-header-cell *matHeaderCellDef>Valor</th>
+            <td mat-cell *matCellDef="let pagamento" class="valor-cell">
+              {{ formatValor(pagamento.valor) }}
+            </td>
+          </ng-container>
+
+          <!-- Data Pagamento Column -->
+          <ng-container matColumnDef="dataPagamento">
+            <th mat-header-cell *matHeaderCellDef>Data Pagamento</th>
+            <td mat-cell *matCellDef="let pagamento">
+              {{ formatData(pagamento.dataPagamento) }}
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let pagamento">
+              <span class="status-badge" [ngClass]="getStatusClass(pagamento.status)">
+                {{ pagamento.status }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Ações Column -->
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef>Ações</th>
+            <td mat-cell *matCellDef="let pagamento">
+              <div class="action-buttons">
+                <button mat-icon-button color="primary" 
+                        (click)="viewRecibo(pagamento)"
+                        matTooltip="Visualizar Recibo">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button color="accent" 
+                        (click)="downloadRecibo(pagamento)"
+                        matTooltip="Baixar Recibo">
+                  <mat-icon>download</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" 
+                        (click)="reprintRecibo(pagamento)"
+                        matTooltip="Reimprimir (2ª Via)">
+                  <mat-icon>print</mat-icon>
+                </button>
+                <button mat-icon-button 
+                        (click)="viewReciboHistory(pagamento)"
+                        matTooltip="Histórico de Recibos">
+                  <mat-icon>history</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <mat-paginator 
+          [length]="totalElements"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[5, 10, 25, 50]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

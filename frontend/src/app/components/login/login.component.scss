@@ -11,6 +11,22 @@
   width: 100%;
   max-width: 400px;
   padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+  mat-card-header {
+    margin-bottom: 1.5rem;
+    text-align: center;
+
+    mat-card-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    mat-card-subtitle {
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
 }
 
 .full-width {
@@ -19,12 +35,68 @@
 }
 
 .error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   color: #f44336;
+  background-color: #ffebee;
+  padding: 0.75rem;
+  border-radius: 4px;
   margin-bottom: 1rem;
-  text-align: center;
+  font-size: 0.875rem;
+
+  mat-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
 }
 
-mat-spinner {
-  display: inline-block;
-  margin: 0 auto;
+.warning-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ff9800;
+  background-color: #fff3e0;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+
+  mat-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+.submit-button {
+  height: 48px;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+
+  mat-spinner {
+    display: inline-block;
+    margin-right: 0.5rem;
+  }
+
+  .loading-text {
+    vertical-align: middle;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 480px) {
+  .login-container {
+    padding: 0.5rem;
+  }
+
+  .login-card {
+    padding: 1.5rem;
+
+    mat-card-header mat-card-title {
+      font-size: 1.25rem;
+    }
+  }
 }

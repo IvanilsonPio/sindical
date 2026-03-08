@@ -17,9 +17,12 @@ spring:
   h2:
     console:
       enabled: true
+  
+  flyway:
+    enabled: false  # Disable Flyway for tests - use JPA ddl-auto instead
 
 jwt:
-  secret: test-secret-key-for-testing-purposes-only
+  secret: test-secret-key-for-testing-purposes-only-must-be-at-least-256-bits-long-for-hs256
   expiration: 3600000 # 1 hour for tests
   refresh-expiration: 7200000 # 2 hours for tests
 

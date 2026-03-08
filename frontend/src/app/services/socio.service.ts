@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Socio, SocioRequest, FiltroSocio } from '../models/socio.model';
-import { PagedResponse } from '../models/arquivo.model';
+import { PagedResponse } from '../models/common.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -16,7 +16,7 @@ export class SocioService {
   listarSocios(filtros: FiltroSocio): Observable<PagedResponse<Socio>> {
     let params = new HttpParams();
     
-    if (filtros.termo) params = params.set('termo', filtros.termo);
+    if (filtros.termo) params = params.set('search', filtros.termo);
     if (filtros.status) params = params.set('status', filtros.status);
     if (filtros.page !== undefined) params = params.set('page', filtros.page.toString());
     if (filtros.size !== undefined) params = params.set('size', filtros.size.toString());

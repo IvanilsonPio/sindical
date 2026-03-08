@@ -1,0 +1,194 @@
+mat-card {
+  margin: 20px 0;
+}
+
+mat-card-header {
+  margin-bottom: 20px;
+
+  mat-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+  }
+}
+
+.drop-zone {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+
+  &:hover {
+    border-color: #3f51b5;
+    background-color: #f5f5f5;
+  }
+
+  &.dragging {
+    border-color: #3f51b5;
+    background-color: #e8eaf6;
+    border-style: solid;
+  }
+
+  .upload-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: #757575;
+    margin-bottom: 16px;
+  }
+
+  .drop-text {
+    font-size: 18px;
+    font-weight: 500;
+    color: #424242;
+    margin: 0 0 8px 0;
+  }
+
+  .drop-hint {
+    font-size: 14px;
+    color: #757575;
+    margin: 4px 0;
+  }
+}
+
+.selected-files {
+  margin-top: 24px;
+
+  h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #424242;
+    margin-bottom: 12px;
+  }
+
+  .file-list {
+    margin-bottom: 16px;
+
+    mat-chip-listbox {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-chip {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      height: auto;
+      min-height: 48px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background-color: #fff;
+      width: 100%;
+      justify-content: flex-start;
+
+      &:hover {
+        background-color: #f5f5f5;
+      }
+
+      .file-icon {
+        margin-right: 12px;
+        color: #3f51b5;
+      }
+
+      .file-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+
+        .file-name {
+          font-size: 14px;
+          font-weight: 500;
+          color: #424242;
+          word-break: break-word;
+        }
+
+        .file-size {
+          font-size: 12px;
+          color: #757575;
+          margin-top: 4px;
+        }
+      }
+
+      button[matChipRemove] {
+        margin-left: auto;
+      }
+    }
+  }
+
+  .upload-progress {
+    margin-top: 16px;
+
+    .progress-text {
+      text-align: center;
+      font-size: 14px;
+      color: #757575;
+      margin-top: 8px;
+    }
+  }
+}
+
+mat-card-actions {
+  padding: 16px;
+  display: flex;
+  gap: 8px;
+
+  button {
+    mat-icon {
+      margin-right: 4px;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .drop-zone {
+    padding: 24px;
+
+    .upload-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+    }
+
+    .drop-text {
+      font-size: 16px;
+    }
+
+    .drop-hint {
+      font-size: 12px;
+    }
+  }
+
+  .selected-files {
+    .file-list {
+      .file-chip {
+        padding: 8px 12px;
+
+        .file-info {
+          .file-name {
+            font-size: 13px;
+          }
+
+          .file-size {
+            font-size: 11px;
+          }
+        }
+      }
+    }
+  }
+
+  mat-card-actions {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+}

@@ -1,6 +1,8 @@
 package com.sindicato.config;
 
-import com.sindicato.filter.JwtAuthenticationFilter;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,14 +16,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-import java.util.List;
+import com.sindicato.filter.JwtAuthenticationFilter;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Configuração de segurança do sistema.
@@ -33,11 +37,9 @@ import java.util.List;
 public class SecurityConfig {
     
     private final UserDetailsService userDetailsService;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(UserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     /**
@@ -50,6 +52,20 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * Cria o filtro de autenticação JWT como bean.
+     *
+     * @param jwtUtil utilitário JWT
+     * @param userDetailsService serviço de detalhes do usuário
+     * @return instância de JwtAuthenticationFilter
+     */
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(
+            com.sindicato.util.JwtUtil jwtUtil,
+            UserDetailsService userDetailsService) {
+        return new JwtAuthenticationFilter(jwtUtil, userDetailsService);
     }
 
     /**
@@ -82,11 +98,14 @@ public class SecurityConfig {
      * controle de sessão stateless e integração com JWT.
      *
      * @param http configuração de segurança HTTP
+     * @param jwtAuthenticationFilter filtro de autenticação JWT
      * @return cadeia de filtros de segurança configurada
      * @throws Exception se houver erro na configuração
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 // Desabilita CSRF pois usamos JWT (stateless)
                 .csrf(AbstractHttpConfigurer::disable)
@@ -113,6 +132,11 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 
+                // Configura tratamento de exceções de autenticação
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint())
+                )
+                
                 // Adiciona provedor de autenticação
                 .authenticationProvider(authenticationProvider())
                 
@@ -120,6 +144,21 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    /**
+     * Configura o ponto de entrada de autenticação para retornar 401 Unauthorized
+     * quando o acesso é negado por falta de autenticação.
+     *
+     * @return instância de AuthenticationEntryPoint
+     */
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"" + authException.getMessage() + "\"}");
+        };
     }
 
     /**

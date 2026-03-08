@@ -2,27 +2,54 @@
   <mat-card class="login-card">
     <mat-card-header>
       <mat-card-title>Sistema Sindicato Rural</mat-card-title>
+      <mat-card-subtitle>Acesso Administrativo</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
+      @if (sessionExpiredMessage) {
+        <div class="warning-message">
+          <mat-icon>info</mat-icon>
+          {{ sessionExpiredMessage }}
+        </div>
+      }
+
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Usuário</mat-label>
           <input matInput formControlName="username" autocomplete="username">
+          @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
+            <mat-error>{{ getErrorMessage('username') }}</mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Senha</mat-label>
-          <input matInput type="password" formControlName="password" autocomplete="current-password">
+          <input matInput 
+                 [type]="hidePassword ? 'password' : 'text'" 
+                 formControlName="password" 
+                 autocomplete="current-password">
+          <button mat-icon-button matSuffix 
+                  (click)="togglePasswordVisibility()" 
+                  type="button"
+                  [disabled]="loading">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+            <mat-error>{{ getErrorMessage('password') }}</mat-error>
+          }
         </mat-form-field>
 
         @if (error) {
-          <div class="error-message">{{ error }}</div>
+          <div class="error-message">
+            <mat-icon>error</mat-icon>
+            {{ error }}
+          </div>
         }
 
         <button mat-raised-button color="primary" type="submit" 
-                [disabled]="!loginForm.valid || loading" class="full-width">
+                [disabled]="loading" class="full-width submit-button">
           @if (loading) {
             <mat-spinner diameter="20"></mat-spinner>
+            <span class="loading-text">Autenticando...</span>
           } @else {
             Entrar
           }

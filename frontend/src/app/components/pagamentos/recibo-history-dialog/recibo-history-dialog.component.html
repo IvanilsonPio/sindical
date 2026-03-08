@@ -1,0 +1,95 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>
+    <mat-icon>history</mat-icon>
+    Histórico de Recibos - {{ data.socioNome }}
+  </h2>
+
+  <mat-dialog-content>
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Carregando histórico...</p>
+    </div>
+
+    <div *ngIf="!loading && recibos.length === 0" class="empty-state">
+      <mat-icon>receipt_long</mat-icon>
+      <p>Nenhum recibo encontrado para este sócio</p>
+    </div>
+
+    <div *ngIf="!loading && recibos.length > 0" class="table-container">
+      <table mat-table [dataSource]="recibos" class="recibos-table">
+        <!-- Número Recibo Column -->
+        <ng-container matColumnDef="numeroRecibo">
+          <th mat-header-cell *matHeaderCellDef>Nº Recibo</th>
+          <td mat-cell *matCellDef="let recibo">
+            <strong>{{ recibo.numeroRecibo }}</strong>
+          </td>
+        </ng-container>
+
+        <!-- Período Column -->
+        <ng-container matColumnDef="periodo">
+          <th mat-header-cell *matHeaderCellDef>Período</th>
+          <td mat-cell *matCellDef="let recibo">
+            {{ formatPeriodo(recibo.mes, recibo.ano) }}
+          </td>
+        </ng-container>
+
+        <!-- Valor Column -->
+        <ng-container matColumnDef="valor">
+          <th mat-header-cell *matHeaderCellDef>Valor</th>
+          <td mat-cell *matCellDef="let recibo" class="valor-cell">
+            {{ formatValor(recibo.valor) }}
+          </td>
+        </ng-container>
+
+        <!-- Data Pagamento Column -->
+        <ng-container matColumnDef="dataPagamento">
+          <th mat-header-cell *matHeaderCellDef>Data Pagamento</th>
+          <td mat-cell *matCellDef="let recibo">
+            {{ formatData(recibo.dataPagamento) }}
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let recibo">
+            <span class="status-badge" [ngClass]="getStatusClass(recibo.status)">
+              {{ recibo.status }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Ações Column -->
+        <ng-container matColumnDef="acoes">
+          <th mat-header-cell *matHeaderCellDef>Ações</th>
+          <td mat-cell *matCellDef="let recibo">
+            <div class="action-buttons">
+              <button mat-icon-button color="primary" 
+                      (click)="viewRecibo(recibo)"
+                      matTooltip="Visualizar Recibo">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button color="accent" 
+                      (click)="downloadRecibo(recibo)"
+                      matTooltip="Baixar Recibo">
+                <mat-icon>download</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" 
+                      (click)="reprintRecibo(recibo)"
+                      matTooltip="Reimprimir (2ª Via)">
+                <mat-icon>print</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="close()">Fechar</button>
+  </mat-dialog-actions>
+</div>

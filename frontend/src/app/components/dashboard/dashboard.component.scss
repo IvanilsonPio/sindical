@@ -1,39 +1,157 @@
-.spacer {
-  flex: 1 1 auto;
-}
-
-.user-name {
-  margin-right: 1rem;
-}
-
-.sidenav-container {
-  height: calc(100vh - 64px);
-}
-
-.sidenav {
-  width: 250px;
-  padding-top: 1rem;
-}
-
-.content {
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 2rem;
 }
 
-.content-wrapper {
-  max-width: 1200px;
-  margin: 0 auto;
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 3rem;
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    color: #666;
+  }
 }
 
-@media (max-width: 768px) {
-  .sidenav {
-    width: 200px;
-  }
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.navigation-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
   
-  .content {
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  mat-card-header {
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 0;
+  }
+
+  .card-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    mat-icon {
+      font-size: 40px;
+      width: 40px;
+      height: 40px;
+      color: white;
+    }
+  }
+
+  mat-card-content {
+    text-align: center;
+    padding: 1rem;
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: #666;
+      line-height: 1.5;
+    }
+  }
+
+  mat-card-actions {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+}
+
+// Responsive design for tablets
+@media (max-width: 768px) {
+  .dashboard-container {
     padding: 1rem;
   }
-  
-  .user-name {
-    display: none;
+
+  .dashboard-header {
+    margin-bottom: 2rem;
+
+    h1 {
+      font-size: 1.5rem;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+    }
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+// Responsive design for mobile
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 0.5rem;
+  }
+
+  .dashboard-header {
+    margin-bottom: 1.5rem;
+
+    h1 {
+      font-size: 1.25rem;
+    }
+  }
+
+  .cards-grid {
+    gap: 1rem;
+  }
+
+  .navigation-card {
+    .card-icon {
+      width: 60px;
+      height: 60px;
+
+      mat-icon {
+        font-size: 30px;
+        width: 30px;
+        height: 30px;
+      }
+    }
+
+    mat-card-content {
+      h2 {
+        font-size: 1.25rem;
+      }
+
+      p {
+        font-size: 0.85rem;
+      }
+    }
   }
 }

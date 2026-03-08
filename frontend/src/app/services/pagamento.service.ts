@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Pagamento, PagamentoRequest, FiltroPagamento } from '../models/pagamento.model';
-import { PagedResponse } from '../models/arquivo.model';
+import { PagedResponse } from '../models/common.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -38,5 +39,22 @@ export class PagamentoService {
     return this.http.get(`${this.apiUrl}/${pagamentoId}/recibo`, {
       responseType: 'blob'
     });
+  }
+
+  gerarReciboSegundaVia(pagamentoId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${pagamentoId}/recibo/segunda-via`, {
+      responseType: 'blob'
+    });
+  }
+
+  listarRecibosPorSocio(socioId: number): Observable<Pagamento[]> {
+    const params = new HttpParams()
+      .set('page', '0')
+      .set('size', '100');
+    
+    return this.http.get<PagedResponse<Pagamento>>(`${this.apiUrl}/socio/${socioId}`, { params })
+      .pipe(
+        map(response => response.content)
+      );
   }
 }

@@ -1,0 +1,135 @@
+<div class="arquivo-manager-container">
+  <!-- Upload Section -->
+  <app-arquivo-upload 
+    [socioId]="socioId"
+    (uploadComplete)="onUploadComplete($event)">
+  </app-arquivo-upload>
+
+  <!-- Files List Section -->
+  <mat-card class="files-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>folder</mat-icon>
+        Arquivos do Sócio
+        <span class="socio-name" *ngIf="socioNome"> - {{ socioNome }}</span>
+      </mat-card-title>
+      <div class="header-actions">
+        <button 
+          mat-icon-button 
+          (click)="carregarArquivos()"
+          matTooltip="Atualizar lista"
+          [disabled]="loading">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Loading Spinner -->
+      <div class="loading-container" *ngIf="loading">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Carregando arquivos...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!loading && arquivos.length === 0">
+        <mat-icon class="empty-icon">folder_open</mat-icon>
+        <p>Nenhum arquivo encontrado</p>
+        <p class="empty-hint">Faça upload de arquivos usando o formulário acima</p>
+      </div>
+
+      <!-- Files Table -->
+      <div class="table-container" *ngIf="!loading && arquivos.length > 0">
+        <table mat-table [dataSource]="arquivos" class="files-table">
+          
+          <!-- Thumbnail Column -->
+          <ng-container matColumnDef="thumbnail">
+            <th mat-header-cell *matHeaderCellDef>Visualização</th>
+            <td mat-cell *matCellDef="let arquivo">
+              <div class="thumbnail-container">
+                <img 
+                  *ngIf="isImage(arquivo.tipoConteudo)"
+                  [src]="getThumbnailUrl(arquivo)"
+                  [alt]="arquivo.nomeOriginal"
+                  class="thumbnail-image"
+                  (error)="$event.target.style.display='none'">
+                <mat-icon 
+                  *ngIf="!isImage(arquivo.tipoConteudo)"
+                  class="file-type-icon"
+                  [class.pdf-icon]="arquivo.tipoConteudo === 'application/pdf'">
+                  {{ getFileIcon(arquivo.tipoConteudo) }}
+                </mat-icon>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Nome Column -->
+          <ng-container matColumnDef="nomeOriginal">
+            <th mat-header-cell *matHeaderCellDef>Nome do Arquivo</th>
+            <td mat-cell *matCellDef="let arquivo">
+              <div class="file-name-cell">
+                <span class="file-name">{{ arquivo.nomeOriginal }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Tipo Column -->
+          <ng-container matColumnDef="tipoConteudo">
+            <th mat-header-cell *matHeaderCellDef>Tipo</th>
+            <td mat-cell *matCellDef="let arquivo">
+              <span class="file-type">{{ arquivo.tipoConteudo }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Tamanho Column -->
+          <ng-container matColumnDef="tamanho">
+            <th mat-header-cell *matHeaderCellDef>Tamanho</th>
+            <td mat-cell *matCellDef="let arquivo">
+              {{ arquivo.tamanhoFormatado }}
+            </td>
+          </ng-container>
+
+          <!-- Data Column -->
+          <ng-container matColumnDef="criadoEm">
+            <th mat-header-cell *matHeaderCellDef>Data de Upload</th>
+            <td mat-cell *matCellDef="let arquivo">
+              {{ formatDate(arquivo.criadoEm) }}
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef>Ações</th>
+            <td mat-cell *matCellDef="let arquivo">
+              <div class="action-buttons">
+                <button 
+                  mat-icon-button 
+                  color="primary"
+                  (click)="downloadArquivo(arquivo)"
+                  matTooltip="Baixar arquivo">
+                  <mat-icon>download</mat-icon>
+                </button>
+                <button 
+                  mat-icon-button 
+                  color="warn"
+                  (click)="excluirArquivo(arquivo)"
+                  matTooltip="Excluir arquivo">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+
+      <!-- Files Count -->
+      <div class="files-count" *ngIf="!loading && arquivos.length > 0">
+        <mat-icon>info</mat-icon>
+        <span>Total: {{ arquivos.length }} arquivo(s)</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

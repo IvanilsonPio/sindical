@@ -1,6 +1,6 @@
 package com.sindicato.config;
 
-import com.sindicato.filter.JwtAuthenticationFilter;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -8,8 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Testes para a configuração de segurança.
@@ -21,12 +19,9 @@ class SecurityConfigTest {
     @Mock
     private UserDetailsService userDetailsService;
     
-    @Mock
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-    
     @Test
     void deveConfigurarPasswordEncoderComBCrypt() {
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, jwtAuthenticationFilter);
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService);
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         
         assertThat(passwordEncoder).isNotNull();
@@ -35,7 +30,7 @@ class SecurityConfigTest {
     
     @Test
     void deveCriptografarSenhaCorretamente() {
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, jwtAuthenticationFilter);
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService);
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         String senhaOriginal = "senha123";
         
@@ -48,7 +43,7 @@ class SecurityConfigTest {
     
     @Test
     void deveGerarHashesDiferentesParaMesmaSenha() {
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, jwtAuthenticationFilter);
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService);
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         String senhaOriginal = "senha123";
         
@@ -65,7 +60,7 @@ class SecurityConfigTest {
     
     @Test
     void deveValidarSenhaCorretamente() {
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, jwtAuthenticationFilter);
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService);
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         String senhaOriginal = "senha123";
         String senhaCriptografada = passwordEncoder.encode(senhaOriginal);
@@ -79,7 +74,7 @@ class SecurityConfigTest {
     
     @Test
     void deveRejeitarSenhaIncorreta() {
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, jwtAuthenticationFilter);
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService);
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         String senhaOriginal = "senha123";
         String senhaCriptografada = passwordEncoder.encode(senhaOriginal);
@@ -91,7 +86,7 @@ class SecurityConfigTest {
     
     @Test
     void deveSuportarSenhasComCaracteresEspeciais() {
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, jwtAuthenticationFilter);
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService);
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         String senhaComplexa = "S3nh@!C0mpl3x@#$%";
         

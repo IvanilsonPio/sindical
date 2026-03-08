@@ -1,0 +1,158 @@
+<div class="pagamento-form-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>payment</mat-icon>
+        Registrar Pagamento
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="pagamentoForm" (ngSubmit)="onSubmit()">
+        <!-- Sócio Selection with Autocomplete -->
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Sócio</mat-label>
+            <input
+              type="text"
+              matInput
+              formControlName="socioSearch"
+              [matAutocomplete]="autoSocio"
+              (input)="onSocioInputChange()"
+              placeholder="Digite o nome, CPF ou matrícula do sócio"
+            />
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-autocomplete
+              #autoSocio="matAutocomplete"
+              [displayWith]="displaySocio.bind(this)"
+              (optionSelected)="onSocioSelected($event.option.value)"
+            >
+              <mat-option *ngFor="let socio of filteredSocios$ | async" [value]="socio">
+                <div class="socio-option">
+                  <span class="socio-nome">{{ socio.nome }}</span>
+                  <span class="socio-info">CPF: {{ socio.cpf | slice:0:3 }}.{{ socio.cpf | slice:3:6 }}.{{ socio.cpf | slice:6:9 }}-{{ socio.cpf | slice:9:11 }}</span>
+                  <span class="socio-info">Matrícula: {{ socio.matricula }}</span>
+                </div>
+              </mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="pagamentoForm.get('socioSearch')?.hasError('required')">
+              {{ getErrorMessage('socioSearch') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Selected Socio Display -->
+        <div class="selected-socio" *ngIf="selectedSocio">
+          <mat-icon>check_circle</mat-icon>
+          <span>Sócio selecionado: <strong>{{ selectedSocio.nome }}</strong></span>
+        </div>
+
+        <!-- Período (Mês e Ano) -->
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Mês</mat-label>
+            <mat-select formControlName="mes">
+              <mat-option *ngFor="let mes of meses" [value]="mes.value">
+                {{ mes.label }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>calendar_today</mat-icon>
+            <mat-error *ngIf="pagamentoForm.get('mes')?.invalid">
+              {{ getErrorMessage('mes') }}
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Ano</mat-label>
+            <mat-select formControlName="ano">
+              <mat-option *ngFor="let ano of anos" [value]="ano">
+                {{ ano }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>event</mat-icon>
+            <mat-error *ngIf="pagamentoForm.get('ano')?.invalid">
+              {{ getErrorMessage('ano') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Data de Pagamento -->
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Data de Pagamento</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="dataPagamento"
+              [max]="maxDate"
+            />
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="pagamentoForm.get('dataPagamento')?.invalid">
+              {{ getErrorMessage('dataPagamento') }}
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Valor</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="valor"
+              (blur)="applyValorMask($event)"
+              placeholder="R$ 0,00"
+            />
+            <mat-icon matPrefix>attach_money</mat-icon>
+            <mat-error *ngIf="pagamentoForm.get('valor')?.invalid">
+              {{ getErrorMessage('valor') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Observações -->
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Observações (opcional)</mat-label>
+            <textarea
+              matInput
+              formControlName="observacoes"
+              rows="3"
+              placeholder="Informações adicionais sobre o pagamento"
+            ></textarea>
+            <mat-icon matPrefix>notes</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button
+            mat-raised-button
+            type="button"
+            (click)="onCancel()"
+            [disabled]="loading"
+          >
+            <mat-icon>cancel</mat-icon>
+            Cancelar
+          </button>
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="loading || pagamentoForm.invalid"
+          >
+            <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!loading">save</mat-icon>
+            {{ loading ? 'Registrando...' : 'Registrar Pagamento' }}
+          </button>
+        </div>
+
+        <!-- Info Message -->
+        <div class="info-message">
+          <mat-icon>info</mat-icon>
+          <span>Após o registro, o recibo será gerado automaticamente e disponibilizado para download.</span>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

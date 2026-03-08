@@ -1,0 +1,32 @@
+version: '3.8'
+
+# Development environment - only PostgreSQL
+# Backend and Frontend run locally for hot-reload development
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: sindicato-postgres-dev
+    environment:
+      POSTGRES_DB: sindicato_rural_dev
+      POSTGRES_USER: sindicato_user
+      POSTGRES_PASSWORD: sindicato_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - sindicato-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sindicato_user -d sindicato_rural_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  sindicato-dev-network:
+    driver: bridge
+
+volumes:
+  postgres_dev_data:
+    driver: local

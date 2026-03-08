@@ -28,10 +28,86 @@ Sistema web completo para gerenciamento de sindicato de trabalhadores rurais, de
 
 ## Pré-requisitos
 
+### Para Desenvolvimento Local
 - Java 17 ou superior
-- Maven 3.6 ou superior
-- PostgreSQL 12 ou superior
-- Node.js 18 ou superior (para o frontend)
+- Maven 3.9 ou superior
+- PostgreSQL 15 ou superior
+- Node.js 20 ou superior
+- npm 10 ou superior
+
+### Para Deployment com Docker
+- Docker 20.10 ou superior
+- Docker Compose 2.0 ou superior
+
+## Quick Start
+
+### Opção 1: Docker (Recomendado)
+
+```bash
+# Clone o repositório
+git clone <repository-url>
+cd sistema-sindicato-rural
+
+# Inicie todos os serviços
+./start.sh  # Linux/Mac
+start.bat   # Windows
+
+# Ou use docker-compose diretamente
+docker-compose up -d --build
+```
+
+Acesse:
+- Frontend: http://localhost
+- Backend API: http://localhost:8080/api
+
+### Opção 2: Desenvolvimento Local
+
+```bash
+# 1. Inicie o PostgreSQL
+docker-compose -f docker-compose.dev.yml up -d
+
+# 2. Execute o backend
+mvn spring-boot:run
+
+# 3. Execute o frontend (em outro terminal)
+cd frontend
+npm install
+npm start
+```
+
+Acesse:
+- Frontend: http://localhost:4200
+- Backend API: http://localhost:8080/api
+
+## Deployment
+
+Para instruções detalhadas de deployment, consulte [DEPLOYMENT.md](DEPLOYMENT.md).
+
+### Build de Produção
+
+```bash
+# Backend
+mvn clean package -DskipTests
+
+# Frontend
+cd frontend
+npm run build -- --configuration production
+
+# Docker
+docker-compose up -d --build
+```
+
+### Comandos Úteis (Makefile)
+
+```bash
+make help           # Lista todos os comandos disponíveis
+make dev-up         # Inicia PostgreSQL para desenvolvimento
+make up             # Inicia todos os serviços em produção
+make down           # Para todos os serviços
+make logs           # Mostra logs dos serviços
+make test           # Executa todos os testes
+make backup-db      # Faz backup do banco de dados
+```
 
 ## Configuração do Ambiente
 

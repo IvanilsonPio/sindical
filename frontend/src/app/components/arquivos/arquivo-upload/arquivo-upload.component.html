@@ -1,0 +1,90 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>cloud_upload</mat-icon>
+      Upload de Arquivos
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <!-- Drag and Drop Zone -->
+    <div 
+      class="drop-zone"
+      [class.dragging]="isDragging"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+      (click)="fileInput.click()">
+      
+      <mat-icon class="upload-icon">cloud_upload</mat-icon>
+      <p class="drop-text">Arraste arquivos aqui ou clique para selecionar</p>
+      <p class="drop-hint">
+        Tipos aceitos: PDF, imagens (JPG, PNG, GIF), documentos Office, arquivos de texto e compactados
+      </p>
+      <p class="drop-hint">Tamanho máximo: 10 MB por arquivo</p>
+      
+      <input 
+        #fileInput
+        type="file" 
+        multiple 
+        style="display: none"
+        (change)="onFileSelected($event)"
+        accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z">
+    </div>
+
+    <!-- Selected Files List -->
+    <div class="selected-files" *ngIf="selectedFiles.length > 0">
+      <h3>Arquivos Selecionados ({{ selectedFiles.length }})</h3>
+      
+      <div class="file-list">
+        <mat-chip-listbox>
+          <mat-chip-option 
+            *ngFor="let fileItem of selectedFiles; let i = index"
+            class="file-chip"
+            [disabled]="uploading">
+            
+            <mat-icon class="file-icon">{{ getFileIcon(fileItem.file) }}</mat-icon>
+            
+            <span class="file-info">
+              <span class="file-name">{{ fileItem.file.name }}</span>
+              <span class="file-size">{{ formatFileSize(fileItem.file.size) }}</span>
+            </span>
+            
+            <button 
+              mat-icon-button 
+              (click)="removeFile(i)"
+              [disabled]="uploading"
+              matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+
+      <!-- Upload Progress -->
+      <div class="upload-progress" *ngIf="uploading">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        <p class="progress-text">Enviando arquivos...</p>
+      </div>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions align="end">
+    <button 
+      mat-button 
+      (click)="clearAll()"
+      [disabled]="selectedFiles.length === 0 || uploading">
+      <mat-icon>clear_all</mat-icon>
+      Limpar Tudo
+    </button>
+    
+    <button 
+      mat-raised-button 
+      color="primary"
+      (click)="uploadFiles()"
+      [disabled]="selectedFiles.length === 0 || uploading">
+      <mat-icon>cloud_upload</mat-icon>
+      Enviar {{ selectedFiles.length > 0 ? '(' + selectedFiles.length + ')' : '' }}
+    </button>
+  </mat-card-actions>
+</mat-card>
