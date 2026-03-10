@@ -18,11 +18,12 @@ public interface ArquivoRepository extends JpaRepository<Arquivo, Long> {
     
     /**
      * Busca todos os arquivos associados a um sócio específico.
+     * Utiliza JOIN FETCH para carregar o sócio junto, evitando LazyInitializationException.
      * 
      * @param socioId ID do sócio
      * @return Lista de arquivos do sócio ordenados por data de criação (mais recentes primeiro)
      */
-    @Query("SELECT a FROM Arquivo a WHERE a.socio.id = :socioId ORDER BY a.criadoEm DESC")
+    @Query("SELECT a FROM Arquivo a JOIN FETCH a.socio WHERE a.socio.id = :socioId ORDER BY a.criadoEm DESC")
     List<Arquivo> findBySocioId(@Param("socioId") Long socioId);
     
     /**

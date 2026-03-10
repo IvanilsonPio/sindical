@@ -11,7 +11,8 @@
       <form [formGroup]="pagamentoForm" (ngSubmit)="onSubmit()">
         <!-- Sócio Selection with Autocomplete -->
         <div class="form-row">
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline" class="full-width"
+            [class.field-invalid]="pagamentoForm.get('socioSearch')?.invalid && pagamentoForm.get('socioSearch')?.touched">
             <mat-label>Sócio</mat-label>
             <input
               type="text"
@@ -20,8 +21,11 @@
               [matAutocomplete]="autoSocio"
               (input)="onSocioInputChange()"
               placeholder="Digite o nome, CPF ou matrícula do sócio"
+              aria-required="true"
+              [attr.aria-invalid]="pagamentoForm.get('socioSearch')?.invalid && pagamentoForm.get('socioSearch')?.touched"
+              [attr.aria-describedby]="pagamentoForm.get('socioSearch')?.invalid && pagamentoForm.get('socioSearch')?.touched ? 'socioSearch-error' : null"
             />
-            <mat-icon matPrefix>person</mat-icon>
+            <mat-icon matPrefix aria-hidden="true">person</mat-icon>
             <mat-autocomplete
               #autoSocio="matAutocomplete"
               [displayWith]="displaySocio.bind(this)"
@@ -35,42 +39,50 @@
                 </div>
               </mat-option>
             </mat-autocomplete>
-            <mat-error *ngIf="pagamentoForm.get('socioSearch')?.hasError('required')">
+            <mat-error id="socioSearch-error" role="alert" *ngIf="pagamentoForm.get('socioSearch')?.hasError('required')">
               {{ getErrorMessage('socioSearch') }}
             </mat-error>
           </mat-form-field>
         </div>
 
         <!-- Selected Socio Display -->
-        <div class="selected-socio" *ngIf="selectedSocio">
-          <mat-icon>check_circle</mat-icon>
+        <div class="selected-socio" *ngIf="selectedSocio" role="status" aria-live="polite">
+          <mat-icon aria-hidden="true">check_circle</mat-icon>
           <span>Sócio selecionado: <strong>{{ selectedSocio.nome }}</strong></span>
         </div>
 
         <!-- Período (Mês e Ano) -->
         <div class="form-row">
-          <mat-form-field appearance="outline" class="half-width">
+          <mat-form-field appearance="outline" class="half-width"
+            [class.field-invalid]="pagamentoForm.get('mes')?.invalid && pagamentoForm.get('mes')?.touched">
             <mat-label>Mês</mat-label>
-            <mat-select formControlName="mes">
+            <mat-select formControlName="mes"
+              aria-required="true"
+              [attr.aria-invalid]="pagamentoForm.get('mes')?.invalid && pagamentoForm.get('mes')?.touched"
+              [attr.aria-describedby]="pagamentoForm.get('mes')?.invalid && pagamentoForm.get('mes')?.touched ? 'mes-error' : null">
               <mat-option *ngFor="let mes of meses" [value]="mes.value">
                 {{ mes.label }}
               </mat-option>
             </mat-select>
-            <mat-icon matPrefix>calendar_today</mat-icon>
-            <mat-error *ngIf="pagamentoForm.get('mes')?.invalid">
+            <mat-icon matPrefix aria-hidden="true">calendar_today</mat-icon>
+            <mat-error id="mes-error" role="alert" *ngIf="pagamentoForm.get('mes')?.invalid">
               {{ getErrorMessage('mes') }}
             </mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="half-width">
+          <mat-form-field appearance="outline" class="half-width"
+            [class.field-invalid]="pagamentoForm.get('ano')?.invalid && pagamentoForm.get('ano')?.touched">
             <mat-label>Ano</mat-label>
-            <mat-select formControlName="ano">
+            <mat-select formControlName="ano"
+              aria-required="true"
+              [attr.aria-invalid]="pagamentoForm.get('ano')?.invalid && pagamentoForm.get('ano')?.touched"
+              [attr.aria-describedby]="pagamentoForm.get('ano')?.invalid && pagamentoForm.get('ano')?.touched ? 'ano-error' : null">
               <mat-option *ngFor="let ano of anos" [value]="ano">
                 {{ ano }}
               </mat-option>
             </mat-select>
-            <mat-icon matPrefix>event</mat-icon>
-            <mat-error *ngIf="pagamentoForm.get('ano')?.invalid">
+            <mat-icon matPrefix aria-hidden="true">event</mat-icon>
+            <mat-error id="ano-error" role="alert" *ngIf="pagamentoForm.get('ano')?.invalid">
               {{ getErrorMessage('ano') }}
             </mat-error>
           </mat-form-field>
@@ -78,22 +90,27 @@
 
         <!-- Data de Pagamento -->
         <div class="form-row">
-          <mat-form-field appearance="outline" class="half-width">
+          <mat-form-field appearance="outline" class="half-width"
+            [class.field-invalid]="pagamentoForm.get('dataPagamento')?.invalid && pagamentoForm.get('dataPagamento')?.touched">
             <mat-label>Data de Pagamento</mat-label>
             <input
               matInput
               [matDatepicker]="picker"
               formControlName="dataPagamento"
               [max]="maxDate"
+              aria-required="true"
+              [attr.aria-invalid]="pagamentoForm.get('dataPagamento')?.invalid && pagamentoForm.get('dataPagamento')?.touched"
+              [attr.aria-describedby]="pagamentoForm.get('dataPagamento')?.invalid && pagamentoForm.get('dataPagamento')?.touched ? 'dataPagamento-error' : null"
             />
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
-            <mat-error *ngIf="pagamentoForm.get('dataPagamento')?.invalid">
+            <mat-error id="dataPagamento-error" role="alert" *ngIf="pagamentoForm.get('dataPagamento')?.invalid">
               {{ getErrorMessage('dataPagamento') }}
             </mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="half-width">
+          <mat-form-field appearance="outline" class="half-width"
+            [class.field-invalid]="pagamentoForm.get('valor')?.invalid && pagamentoForm.get('valor')?.touched">
             <mat-label>Valor</mat-label>
             <input
               matInput
@@ -101,9 +118,12 @@
               formControlName="valor"
               (blur)="applyValorMask($event)"
               placeholder="R$ 0,00"
+              aria-required="true"
+              [attr.aria-invalid]="pagamentoForm.get('valor')?.invalid && pagamentoForm.get('valor')?.touched"
+              [attr.aria-describedby]="pagamentoForm.get('valor')?.invalid && pagamentoForm.get('valor')?.touched ? 'valor-error' : null"
             />
-            <mat-icon matPrefix>attach_money</mat-icon>
-            <mat-error *ngIf="pagamentoForm.get('valor')?.invalid">
+            <mat-icon matPrefix aria-hidden="true">attach_money</mat-icon>
+            <mat-error id="valor-error" role="alert" *ngIf="pagamentoForm.get('valor')?.invalid">
               {{ getErrorMessage('valor') }}
             </mat-error>
           </mat-form-field>
@@ -118,8 +138,9 @@
               formControlName="observacoes"
               rows="3"
               placeholder="Informações adicionais sobre o pagamento"
+              [attr.aria-invalid]="pagamentoForm.get('observacoes')?.invalid && pagamentoForm.get('observacoes')?.touched"
             ></textarea>
-            <mat-icon matPrefix>notes</mat-icon>
+            <mat-icon matPrefix aria-hidden="true">notes</mat-icon>
           </mat-form-field>
         </div>
 
@@ -130,8 +151,9 @@
             type="button"
             (click)="onCancel()"
             [disabled]="loading"
+            aria-label="Cancelar registro de pagamento"
           >
-            <mat-icon>cancel</mat-icon>
+            <mat-icon aria-hidden="true">cancel</mat-icon>
             Cancelar
           </button>
 
@@ -140,16 +162,17 @@
             color="primary"
             type="submit"
             [disabled]="loading || pagamentoForm.invalid"
+            aria-label="Registrar pagamento"
           >
-            <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
-            <mat-icon *ngIf="!loading">save</mat-icon>
+            <mat-spinner *ngIf="loading" diameter="20" aria-label="Processando"></mat-spinner>
+            <mat-icon *ngIf="!loading" aria-hidden="true">save</mat-icon>
             {{ loading ? 'Registrando...' : 'Registrar Pagamento' }}
           </button>
         </div>
 
         <!-- Info Message -->
-        <div class="info-message">
-          <mat-icon>info</mat-icon>
+        <div class="info-message" role="status">
+          <mat-icon aria-hidden="true">info</mat-icon>
           <span>Após o registro, o recibo será gerado automaticamente e disponibilizado para download.</span>
         </div>
       </form>

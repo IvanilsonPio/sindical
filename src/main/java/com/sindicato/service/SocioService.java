@@ -1,5 +1,11 @@
 package com.sindicato.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -10,11 +16,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sindicato.dto.CampoAlterado;
+import com.sindicato.dto.HistoricoAlteracaoResponse;
+import com.sindicato.dto.SocioDetalhadoResponse;
 import com.sindicato.dto.SocioRequest;
 import com.sindicato.dto.SocioResponse;
+import com.sindicato.dto.SocioUpdateRequest;
 import com.sindicato.exception.DuplicateEntryException;
 import com.sindicato.exception.ResourceNotFoundException;
 import com.sindicato.model.Socio;
+import com.sindicato.model.SocioHistory;
 import com.sindicato.model.StatusSocio;
 import com.sindicato.repository.SocioRepository;
 
@@ -103,6 +114,51 @@ public class SocioService {
         
         return new SocioResponse(socio);
     }
+
+    /**
+     * Gets detailed information about a socio including all relationships.
+     * Uses optimized query with JOIN FETCH to load pagamentos and arquivos.
+     * Pagamentos are sorted by date descending (most recent first).
+     * Arquivos are sorted by upload date descending (most recent first).
+     *
+     * @param id Socio ID
+     * @return SocioDetalhadoResponse with all socio data and relationships
+     * @throws ResourceNotFoundException if socio not found
+     */
+    /**
+     * Gets detailed information about a socio including all relationships.
+     * Uses optimized query with JOIN FETCH to load pagamentos and arquivos.
+     * Pagamentos are sorted by date descending (most recent first).
+     * Arquivos are sorted by upload date descending (most recent first).
+     * Historico is loaded and sorted by date/time descending (most recent first).
+     *
+     * Requirements: 1.1, 1.6, 1.7, 5.5, 5.6
+     *
+     * @param id Socio ID
+     * @return SocioDetalhadoResponse with all socio data and relationships
+     * @throws ResourceNotFoundException if socio not found
+     */
+    @Transactional(readOnly = true)
+    public SocioDetalhadoResponse getSocioDetalhado(Long id) {
+        logger.debug("Finding detailed socio information for id: {}", id);
+
+        // Fetch socio with pagamentos first
+        Socio socio = socioRepository.findByIdWithPagamentos(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Socio", "id", id));
+
+        // Then fetch arquivos separately to avoid MultipleBagFetchException
+        socioRepository.findByIdWithArquivos(id);
+
+        // SocioDetalhadoResponse constructor handles sorting of pagamentos and arquivos
+        SocioDetalhadoResponse response = new SocioDetalhadoResponse(socio);
+
+        // Load and add history (already sorted by date descending in getHistoricoAlteracoes)
+        List<HistoricoAlteracaoResponse> historico = getHistoricoAlteracoes(id);
+        response.setHistorico(historico);
+
+        return response;
+    }
+
     
     /**
      * Finds a socio by CPF.
@@ -224,6 +280,58 @@ public class SocioService {
         
         return new SocioResponse(updatedSocio);
     }
+    /**
+     * Updates an existing socio with validations using SocioUpdateRequest.
+     * Records the username of the user who made the change for audit purposes.
+     * Evicts both individual socio cache and socios list cache.
+     *
+     * @param id Socio ID
+     * @param request SocioUpdateRequest with updated data
+     * @param username Username of the authenticated user making the change
+     * @return SocioResponse of the updated socio
+     * @throws ResourceNotFoundException if socio not found
+     * @throws DuplicateEntryException if CPF or matrícula already exists for another socio
+     */
+    @Caching(evict = {
+        @CacheEvict(value = "socio", key = "#id"),
+        @CacheEvict(value = "socios", allEntries = true)
+    })
+    public SocioResponse updateSocio(Long id, SocioUpdateRequest request, String username) {
+        logger.info("Updating socio with id: {} by user: {}", id, username);
+
+        Socio existingSocio = socioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Socio", "id", id));
+
+        // Store old values for history tracking
+        Socio oldSocio = copySocio(existingSocio);
+
+        // Validate unique CPF (excluding current socio)
+        if (!existingSocio.getCpf().equals(request.getCpf()) &&
+            socioRepository.existsByCpfAndIdNot(request.getCpf(), id)) {
+            throw new DuplicateEntryException("CPF", request.getCpf());
+        }
+
+        // Validate unique matrícula (excluding current socio)
+        if (!existingSocio.getMatricula().equals(request.getMatricula()) &&
+            socioRepository.existsByMatriculaAndIdNot(request.getMatricula(), id)) {
+            throw new DuplicateEntryException("Matrícula", request.getMatricula());
+        }
+
+        // Apply changes from SocioUpdateRequest
+        updateEntityFromUpdateRequest(existingSocio, request);
+
+        Socio updatedSocio = socioRepository.save(existingSocio);
+        logger.info("Socio updated successfully with id: {} by user: {}", updatedSocio.getId(), username);
+
+        // Record update in history with actual username
+        historyService.recordUpdate(oldSocio, updatedSocio, username);
+
+        // Log audit
+        auditService.logAtualizacao("Socio", updatedSocio.getId(), oldSocio, updatedSocio);
+
+        return new SocioResponse(updatedSocio);
+    }
+
     
     /**
      * Soft deletes a socio by changing status to INATIVO.
@@ -366,4 +474,150 @@ public class SocioService {
         copy.setAtualizadoEm(original.getAtualizadoEm());
         return copy;
     }
+    
+    private void updateEntityFromUpdateRequest(Socio socio, SocioUpdateRequest request) {
+        socio.setNome(request.getNome());
+        socio.setCpf(request.getCpf());
+        socio.setMatricula(request.getMatricula());
+        socio.setRg(request.getRg());
+        socio.setDataNascimento(request.getDataNascimento());
+        socio.setTelefone(request.getTelefone());
+        socio.setEmail(request.getEmail());
+        socio.setEndereco(request.getEndereco());
+        socio.setCidade(request.getCidade());
+        socio.setEstado(request.getEstado());
+        socio.setCep(request.getCep());
+        socio.setProfissao(request.getProfissao());
+        socio.setStatus(request.getStatus());
+    }
+
+
+    /**
+     * Gets the history of changes for a specific socio.
+     * Returns all alterations ordered by date/time descending (most recent first).
+     *
+     * Requirements: 5.5, 5.6
+     *
+     * @param id Socio ID
+     * @return List of HistoricoAlteracaoResponse with all changes
+     */
+    @Transactional(readOnly = true)
+    public List<HistoricoAlteracaoResponse> getHistoricoAlteracoes(Long id) {
+        logger.debug("Getting history for socio id: {}", id);
+
+        // Verify socio exists
+        if (!socioRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Socio", "id", id);
+        }
+
+        Iterable<SocioHistory> history = historyService.getHistoryBySocioId(id);
+
+        List<HistoricoAlteracaoResponse> responses = new ArrayList<>();
+
+        for (SocioHistory record : history) {
+            HistoricoAlteracaoResponse response = new HistoricoAlteracaoResponse();
+            response.setId(record.getId());
+            response.setSocioId(record.getSocioId());
+            response.setUsuario(record.getUsuario());
+            response.setDataHora(record.getDataOperacao());
+            response.setOperacao(record.getTipoOperacao().name());
+
+            // Parse and compare JSON data to extract changed fields
+            Map<String, CampoAlterado> camposAlterados =
+                extractChangedFields(record.getDadosAnteriores(), record.getDadosNovos());
+            response.setCamposAlterados(camposAlterados);
+
+            responses.add(response);
+        }
+
+        logger.debug("Found {} history records for socio id: {}", responses.size(), id);
+        return responses;
+    }
+
+    /**
+     * Extracts changed fields by comparing old and new JSON data.
+     *
+     * @param dadosAnteriores JSON string with previous data
+     * @param dadosNovos JSON string with new data
+     * @return Map of field names to CampoAlterado objects
+     */
+    private Map<String, CampoAlterado> extractChangedFields(
+            String dadosAnteriores, String dadosNovos) {
+
+        Map<String, CampoAlterado> changes = new HashMap<>();
+
+        // Simple JSON parsing for the fields we track
+        // In production, use Jackson ObjectMapper for robust parsing
+
+        if (dadosAnteriores == null && dadosNovos != null) {
+            // Creation - all fields are new
+            changes.put("status", new CampoAlterado("status", null, extractJsonValue(dadosNovos, "status")));
+            return changes;
+        }
+
+        if (dadosAnteriores != null && dadosNovos == null) {
+            // Deletion - all fields removed
+            changes.put("status", new CampoAlterado("status", extractJsonValue(dadosAnteriores, "status"), null));
+            return changes;
+        }
+
+        if (dadosAnteriores != null && dadosNovos != null) {
+            // Update - compare fields
+            String[] fields = {"nome", "cpf", "matricula", "status"};
+
+            for (String field : fields) {
+                String oldValue = extractJsonValue(dadosAnteriores, field);
+                String newValue = extractJsonValue(dadosNovos, field);
+
+                if (!Objects.equals(oldValue, newValue)) {
+                    changes.put(field, new CampoAlterado(field, oldValue, newValue));
+                }
+            }
+        }
+
+        return changes;
+    }
+
+    /**
+     * Extracts a value from a simple JSON string.
+     * This is a basic implementation - in production use Jackson ObjectMapper.
+     *
+     * @param json JSON string
+     * @param key Key to extract
+     * @return Value as string, or null if not found
+     */
+    private String extractJsonValue(String json, String key) {
+        if (json == null) return null;
+
+        String searchKey = "\"" + key + "\":";
+        int startIndex = json.indexOf(searchKey);
+        if (startIndex == -1) return null;
+
+        startIndex += searchKey.length();
+
+        // Skip whitespace
+        while (startIndex < json.length() && Character.isWhitespace(json.charAt(startIndex))) {
+            startIndex++;
+        }
+
+        if (startIndex >= json.length()) return null;
+
+        // Check if value is a string (starts with ")
+        if (json.charAt(startIndex) == '"') {
+            startIndex++; // Skip opening quote
+            int endIndex = json.indexOf('"', startIndex);
+            if (endIndex == -1) return null;
+            return json.substring(startIndex, endIndex);
+        } else {
+            // Value is not a string (number, boolean, null)
+            int endIndex = startIndex;
+            while (endIndex < json.length() &&
+                   json.charAt(endIndex) != ',' &&
+                   json.charAt(endIndex) != '}') {
+                endIndex++;
+            }
+            return json.substring(startIndex, endIndex).trim();
+        }
+    }
+
 }

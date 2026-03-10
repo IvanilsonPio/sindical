@@ -1,0 +1,252 @@
+<div class="socio-detail-container">
+  <!-- Loading Indicator -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Carregando...</p>
+  </div>
+
+  <!-- Error Message -->
+  <mat-card *ngIf="error && !loading" class="error-card">
+    <mat-card-content>
+      <div class="error-message">
+        <mat-icon color="warn">error</mat-icon>
+        <span>{{ error }}</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Socio Details -->
+  <div *ngIf="socio && !loading" class="detail-content">
+    <!-- Header with Actions -->
+    <mat-card class="header-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>person</mat-icon>
+          {{ socio.nome }}
+        </mat-card-title>
+        <mat-card-subtitle>
+          Matrícula: {{ socio.matricula }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-actions align="end">
+        <button mat-raised-button color="primary" (click)="navigateToEdit()">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+        <button mat-raised-button (click)="close()">
+          <mat-icon>close</mat-icon>
+          Fechar
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Status Badge -->
+    <mat-card class="status-card">
+      <mat-card-content>
+        <div class="status-section">
+          <h3>Status</h3>
+          <mat-chip-set>
+            <mat-chip [class.status-ativo]="socio.status === 'ATIVO'" 
+                      [class.status-inativo]="socio.status === 'INATIVO'">
+              {{ socio.status }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Dados Pessoais -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>badge</mat-icon>
+          Dados Pessoais
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Nome Completo:</label>
+            <span>{{ socio.nome }}</span>
+          </div>
+          <div class="info-item">
+            <label>CPF:</label>
+            <span>{{ socio.cpf }}</span>
+          </div>
+          <div class="info-item">
+            <label>RG:</label>
+            <span>{{ socio.rg || 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Data de Nascimento:</label>
+            <span>{{ socio.dataNascimento ? (socio.dataNascimento | date: 'dd/MM/yyyy') : 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Estado Civil:</label>
+            <span>{{ socio.estadoCivil || 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Matrícula:</label>
+            <span>{{ socio.matricula }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Endereço -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>home</mat-icon>
+          Endereço
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>CEP:</label>
+            <span>{{ socio.cep || 'Não informado' }}</span>
+          </div>
+          <div class="info-item full-width">
+            <label>Logradouro:</label>
+            <span>{{ socio.endereco || 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Número:</label>
+            <span>{{ socio.numero || 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Complemento:</label>
+            <span>{{ socio.complemento || 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Bairro:</label>
+            <span>{{ socio.bairro || 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Cidade:</label>
+            <span>{{ socio.cidade || 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Estado:</label>
+            <span>{{ socio.estado || 'Não informado' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Contato -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>contact_phone</mat-icon>
+          Contato
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Telefone:</label>
+            <span>{{ socio.telefone || 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Celular:</label>
+            <span>{{ socio.celular || 'Não informado' }}</span>
+          </div>
+          <div class="info-item full-width">
+            <label>Email:</label>
+            <span>{{ socio.email || 'Não informado' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Histórico de Pagamentos -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>payment</mat-icon>
+          Histórico de Pagamentos
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="socio.pagamentos && socio.pagamentos.length > 0" class="pagamentos-list">
+          <div *ngFor="let pagamento of socio.pagamentos" class="pagamento-item">
+            <div class="pagamento-info">
+              <span class="pagamento-periodo">{{ pagamento.mes }}/{{ pagamento.ano }}</span>
+              <span class="pagamento-valor">{{ pagamento.valor | currency: 'BRL' }}</span>
+            </div>
+            <div class="pagamento-details">
+              <span class="pagamento-data">Pago em: {{ pagamento.dataPagamento | date: 'dd/MM/yyyy' }}</span>
+              <span class="pagamento-recibo" *ngIf="pagamento.numeroRecibo">Recibo: {{ pagamento.numeroRecibo }}</span>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!socio.pagamentos || socio.pagamentos.length === 0" class="empty-message">
+          <mat-icon>info</mat-icon>
+          <p>Nenhum pagamento registrado</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Arquivos Vinculados -->
+    <app-arquivo-manager 
+      *ngIf="socioId" 
+      [socioId]="socioId" 
+      [socioNome]="socio.nome"
+      (arquivosChanged)="onArquivosChanged()">
+    </app-arquivo-manager>
+
+    <!-- Histórico de Alterações -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>history</mat-icon>
+          Histórico de Alterações
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="socio.historico && socio.historico.length > 0" class="historico-list">
+          <div *ngFor="let alteracao of socio.historico" class="historico-item">
+            <div class="historico-header">
+              <div class="historico-info">
+                <span class="historico-operacao" [class.operacao-create]="alteracao.operacao === 'CREATE'"
+                                                  [class.operacao-update]="alteracao.operacao === 'UPDATE'"
+                                                  [class.operacao-delete]="alteracao.operacao === 'DELETE'">
+                  {{ getOperacaoLabel(alteracao.operacao) }}
+                </span>
+                <span class="historico-data">{{ alteracao.dataHora | date: 'dd/MM/yyyy HH:mm:ss' }}</span>
+              </div>
+              <span class="historico-usuario">
+                <mat-icon>person</mat-icon>
+                {{ alteracao.usuario }}
+              </span>
+            </div>
+            
+            <div *ngIf="alteracao.camposAlterados && getChangedFieldsArray(alteracao.camposAlterados).length > 0" 
+                 class="campos-alterados">
+              <div *ngFor="let campo of getChangedFieldsArray(alteracao.camposAlterados)" class="campo-item">
+                <div class="campo-nome">{{ getFieldLabel(campo.nomeCampo) }}</div>
+                <div class="campo-valores">
+                  <div class="valor-anterior">
+                    <span class="label">Anterior:</span>
+                    <span class="valor">{{ campo.valorAnterior || 'Não informado' }}</span>
+                  </div>
+                  <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                  <div class="valor-novo">
+                    <span class="label">Novo:</span>
+                    <span class="valor">{{ campo.valorNovo || 'Não informado' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!socio.historico || socio.historico.length === 0" class="empty-message">
+          <mat-icon>info</mat-icon>
+          <p>Nenhuma alteração registrada</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

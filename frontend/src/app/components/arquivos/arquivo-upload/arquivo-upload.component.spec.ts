@@ -40,13 +40,19 @@ describe('ArquivoUploadComponent', () => {
   });
 
   describe('File Validation', () => {
-    it('should reject files larger than 10 MB', () => {
+    it('should reject files larger than 10 MB with specific error message', () => {
       const largeFile = new File(['x'.repeat(11 * 1024 * 1024)], 'large.pdf', { type: 'application/pdf' });
       const event = { target: { files: [largeFile] } } as any;
-
+      
+      spyOn(component['snackBar'], 'open');
       component.onFileSelected(event);
 
       expect(component.selectedFiles.length).toBe(0);
+      expect(component['snackBar'].open).toHaveBeenCalledWith(
+        'Arquivo excede o tamanho máximo permitido de 10MB',
+        'Fechar',
+        { duration: 5000 }
+      );
     });
 
     it('should reject empty files', () => {
@@ -58,13 +64,19 @@ describe('ArquivoUploadComponent', () => {
       expect(component.selectedFiles.length).toBe(0);
     });
 
-    it('should reject files with invalid types', () => {
+    it('should reject files with invalid types with specific error message', () => {
       const invalidFile = new File(['content'], 'file.exe', { type: 'application/x-msdownload' });
       const event = { target: { files: [invalidFile] } } as any;
-
+      
+      spyOn(component['snackBar'], 'open');
       component.onFileSelected(event);
 
       expect(component.selectedFiles.length).toBe(0);
+      expect(component['snackBar'].open).toHaveBeenCalledWith(
+        'Tipo de arquivo não permitido. Formatos aceitos: PDF, DOC, DOCX, JPG, JPEG, PNG',
+        'Fechar',
+        { duration: 5000 }
+      );
     });
 
     it('should accept valid PDF files', () => {
@@ -77,7 +89,29 @@ describe('ArquivoUploadComponent', () => {
       expect(component.selectedFiles[0].file.name).toBe('document.pdf');
     });
 
-    it('should accept valid image files', () => {
+    it('should accept valid DOC files', () => {
+      const validFile = new File(['content'], 'document.doc', { type: 'application/msword' });
+      const event = { target: { files: [validFile] } } as any;
+
+      component.onFileSelected(event);
+
+      expect(component.selectedFiles.length).toBe(1);
+      expect(component.selectedFiles[0].file.name).toBe('document.doc');
+    });
+
+    it('should accept valid DOCX files', () => {
+      const validFile = new File(['content'], 'document.docx', { 
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+      });
+      const event = { target: { files: [validFile] } } as any;
+
+      component.onFileSelected(event);
+
+      expect(component.selectedFiles.length).toBe(1);
+      expect(component.selectedFiles[0].file.name).toBe('document.docx');
+    });
+
+    it('should accept valid JPG files', () => {
       const validFile = new File(['content'], 'image.jpg', { type: 'image/jpeg' });
       const event = { target: { files: [validFile] } } as any;
 
@@ -85,6 +119,26 @@ describe('ArquivoUploadComponent', () => {
 
       expect(component.selectedFiles.length).toBe(1);
       expect(component.selectedFiles[0].file.name).toBe('image.jpg');
+    });
+
+    it('should accept valid JPEG files', () => {
+      const validFile = new File(['content'], 'image.jpeg', { type: 'image/jpeg' });
+      const event = { target: { files: [validFile] } } as any;
+
+      component.onFileSelected(event);
+
+      expect(component.selectedFiles.length).toBe(1);
+      expect(component.selectedFiles[0].file.name).toBe('image.jpeg');
+    });
+
+    it('should accept valid PNG files', () => {
+      const validFile = new File(['content'], 'image.png', { type: 'image/png' });
+      const event = { target: { files: [validFile] } } as any;
+
+      component.onFileSelected(event);
+
+      expect(component.selectedFiles.length).toBe(1);
+      expect(component.selectedFiles[0].file.name).toBe('image.png');
     });
 
     it('should accept multiple valid files', () => {
@@ -95,6 +149,31 @@ describe('ArquivoUploadComponent', () => {
       component.onFileSelected(event);
 
       expect(component.selectedFiles.length).toBe(2);
+    });
+
+    it('should validate file by extension when MIME type is not recognized', () => {
+      // Some browsers may not set the correct MIME type
+      const validFile = new File(['content'], 'document.pdf', { type: '' });
+      const event = { target: { files: [validFile] } } as any;
+
+      component.onFileSelected(event);
+
+      expect(component.selectedFiles.length).toBe(1);
+    });
+
+    it('should reject files with invalid extension even if MIME type is empty', () => {
+      const invalidFile = new File(['content'], 'file.txt', { type: '' });
+      const event = { target: { files: [invalidFile] } } as any;
+      
+      spyOn(component['snackBar'], 'open');
+      component.onFileSelected(event);
+
+      expect(component.selectedFiles.length).toBe(0);
+      expect(component['snackBar'].open).toHaveBeenCalledWith(
+        'Tipo de arquivo não permitido. Formatos aceitos: PDF, DOC, DOCX, JPG, JPEG, PNG',
+        'Fechar',
+        { duration: 5000 }
+      );
     });
   });
 
@@ -266,10 +345,9 @@ describe('ArquivoUploadComponent', () => {
     it('should return correct icon for file types', () => {
       expect(component.getFileIcon(new File([], 'test.pdf', { type: 'application/pdf' }))).toBe('picture_as_pdf');
       expect(component.getFileIcon(new File([], 'test.jpg', { type: 'image/jpeg' }))).toBe('image');
+      expect(component.getFileIcon(new File([], 'test.png', { type: 'image/png' }))).toBe('image');
       expect(component.getFileIcon(new File([], 'test.doc', { type: 'application/msword' }))).toBe('description');
-      expect(component.getFileIcon(new File([], 'test.xls', { type: 'application/vnd.ms-excel' }))).toBe('table_chart');
-      expect(component.getFileIcon(new File([], 'test.zip', { type: 'application/zip' }))).toBe('folder_zip');
-      expect(component.getFileIcon(new File([], 'test.txt', { type: 'text/plain' }))).toBe('insert_drive_file');
+      expect(component.getFileIcon(new File([], 'test.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }))).toBe('description');
     });
   });
 });

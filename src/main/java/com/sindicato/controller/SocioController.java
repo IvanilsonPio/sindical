@@ -1,6 +1,7 @@
 package com.sindicato.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,8 +27,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sindicato.dto.HistoricoAlteracaoResponse;
+import com.sindicato.dto.SocioDetalhadoResponse;
 import com.sindicato.dto.SocioRequest;
 import com.sindicato.dto.SocioResponse;
+import com.sindicato.dto.SocioUpdateRequest;
 import com.sindicato.exception.DuplicateEntryException;
 import com.sindicato.exception.ResourceNotFoundException;
 import com.sindicato.model.StatusSocio;
@@ -106,6 +112,44 @@ public class SocioController {
         SocioResponse socio = socioService.buscarPorId(id);
         return ResponseEntity.ok(socio);
     }
+
+    /**
+     * Gets detailed information about a specific socio including all relationships.
+     * Returns complete socio data with pagamentos and arquivos.
+     *
+     * Requirements: 1.1, 6.1
+     *
+     * @param id Socio ID
+     * @return SocioDetalhadoResponse with all socio data
+     * @throws ResourceNotFoundException if socio not found (returns 404)
+     */
+    @GetMapping("/{id}/detalhes")
+    public ResponseEntity<SocioDetalhadoResponse> getSocioDetalhado(@PathVariable Long id) {
+        logger.debug("GET /api/socios/{}/detalhes", id);
+
+        SocioDetalhadoResponse socio = socioService.getSocioDetalhado(id);
+        return ResponseEntity.ok(socio);
+    }
+
+    /**
+     * Gets the history of changes for a specific socio.
+     * Returns all alterations ordered by date/time descending (most recent first).
+     *
+     * Requirements: 5.5, 5.6
+     *
+     * @param id Socio ID
+     * @return List of HistoricoAlteracaoResponse with all changes
+     * @throws ResourceNotFoundException if socio not found (returns 404)
+     */
+    @GetMapping("/{id}/historico")
+    public ResponseEntity<List<HistoricoAlteracaoResponse>> getHistoricoAlteracoes(@PathVariable Long id) {
+        logger.debug("GET /api/socios/{}/historico", id);
+
+        List<HistoricoAlteracaoResponse> historico = socioService.getHistoricoAlteracoes(id);
+        return ResponseEntity.ok(historico);
+    }
+
+
     
     /**
      * Searches for a socio by CPF.
@@ -207,6 +251,35 @@ public class SocioController {
         SocioResponse socio = socioService.atualizarSocio(id, request);
         
         logger.info("Socio {} updated successfully", id);
+        return ResponseEntity.ok(socio);
+    }
+    
+    /**
+     * Updates an existing socio with full validation and audit tracking.
+     * Uses SocioUpdateRequest with comprehensive Bean Validation.
+     * Captures authenticated user for audit trail.
+     * 
+     * Requirements: 2.1, 2.8, 6.2, 6.5
+     * 
+     * @param id Socio ID
+     * @param request SocioUpdateRequest with updated data
+     * @param userDetails Authenticated user details
+     * @return Updated SocioResponse
+     * @throws ResourceNotFoundException if socio not found (returns 404)
+     * @throws DuplicateEntryException if CPF or matrícula conflicts (returns 409)
+     */
+    @PutMapping("/{id}/update")
+    public ResponseEntity<SocioResponse> updateSocio(
+            @PathVariable Long id,
+            @Valid @RequestBody SocioUpdateRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        String username = userDetails != null ? userDetails.getUsername() : "Sistema";
+        logger.info("PUT /api/socios/{}/update - Updating socio by user: {}", id, username);
+        
+        SocioResponse socio = socioService.updateSocio(id, request, username);
+        
+        logger.info("Socio {} updated successfully by user: {}", id, username);
         return ResponseEntity.ok(socio);
     }
     

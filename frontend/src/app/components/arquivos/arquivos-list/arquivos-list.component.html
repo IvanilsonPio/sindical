@@ -1,0 +1,119 @@
+<div class="page-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <div class="header-content">
+          <h1>Gestão de Arquivos</h1>
+          <div class="actions">
+            <button mat-raised-button color="primary" (click)="criarPasta()">
+              <mat-icon>create_new_folder</mat-icon>
+              Nova Pasta
+            </button>
+            <button mat-raised-button color="accent" (click)="fileInput.click()">
+              <mat-icon>upload_file</mat-icon>
+              Enviar Arquivos
+            </button>
+            <input #fileInput type="file" multiple hidden (change)="onFileSelected($event)">
+          </div>
+        </div>
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <button mat-button (click)="navegarParaPasta(-1)">
+          <mat-icon>home</mat-icon>
+          Raiz
+        </button>
+        <ng-container *ngFor="let pasta of caminhoBreadcrumb; let i = index">
+          <mat-icon>chevron_right</mat-icon>
+          <button mat-button (click)="navegarParaPasta(i)">
+            {{ pasta.nome }}
+          </button>
+        </ng-container>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="loading">
+        <p>Carregando...</p>
+      </div>
+
+      <!-- Pastas -->
+      <div *ngIf="!loading && pastas.length > 0" class="pastas-grid">
+        <h3>Pastas</h3>
+        <div class="grid">
+          <mat-card *ngFor="let pasta of pastas" class="pasta-card">
+            <mat-card-content>
+              <div class="pasta-icon" (click)="navegarParaPastaInicial(pasta)">
+                <mat-icon>folder</mat-icon>
+                <p>{{ pasta.nome }}</p>
+              </div>
+              <div class="pasta-info">
+                <mat-chip-set>
+                  <mat-chip>{{ pasta.quantidadeSubpastas }} pastas</mat-chip>
+                  <mat-chip>{{ pasta.quantidadeArquivos }} arquivos</mat-chip>
+                </mat-chip-set>
+              </div>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-icon-button [matTooltip]="'Excluir pasta'" (click)="excluirPasta(pasta)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+
+      <!-- Arquivos -->
+      <div *ngIf="!loading && arquivos.length > 0" class="arquivos-section">
+        <h3>Arquivos</h3>
+        <table mat-table [dataSource]="arquivos" class="arquivos-table">
+          <ng-container matColumnDef="icone">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let arquivo">
+              <mat-icon>{{ getIconeArquivo(arquivo.tipoConteudo) }}</mat-icon>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef>Nome</th>
+            <td mat-cell *matCellDef="let arquivo">{{ arquivo.nomeOriginal }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="tamanho">
+            <th mat-header-cell *matHeaderCellDef>Tamanho</th>
+            <td mat-cell *matCellDef="let arquivo">{{ arquivo.tamanhoFormatado }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="data">
+            <th mat-header-cell *matHeaderCellDef>Data</th>
+            <td mat-cell *matCellDef="let arquivo">{{ arquivo.criadoEm | date:'dd/MM/yyyy HH:mm' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef>Ações</th>
+            <td mat-cell *matCellDef="let arquivo">
+              <button mat-icon-button [matTooltip]="'Download'" (click)="downloadArquivo(arquivo)">
+                <mat-icon>download</mat-icon>
+              </button>
+              <button mat-icon-button [matTooltip]="'Excluir'" (click)="excluirArquivo(arquivo)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['icone', 'nome', 'tamanho', 'data', 'acoes']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['icone', 'nome', 'tamanho', 'data', 'acoes']"></tr>
+        </table>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!loading && pastas.length === 0 && arquivos.length === 0" class="empty-state">
+        <mat-icon>folder_open</mat-icon>
+        <p>Nenhuma pasta ou arquivo encontrado</p>
+        <p>Crie uma pasta ou envie arquivos para começar</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

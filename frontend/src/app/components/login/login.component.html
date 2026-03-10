@@ -6,49 +6,59 @@
     </mat-card-header>
     <mat-card-content>
       @if (sessionExpiredMessage) {
-        <div class="warning-message">
-          <mat-icon>info</mat-icon>
+        <div class="warning-message" role="alert">
+          <mat-icon aria-hidden="true">info</mat-icon>
           {{ sessionExpiredMessage }}
         </div>
       }
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="full-width"
+          [class.field-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
           <mat-label>Usuário</mat-label>
-          <input matInput formControlName="username" autocomplete="username">
+          <input matInput formControlName="username" autocomplete="username"
+            aria-required="true"
+            [attr.aria-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
+            [attr.aria-describedby]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched ? 'username-error' : null">
           @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
-            <mat-error>{{ getErrorMessage('username') }}</mat-error>
+            <mat-error id="username-error" role="alert">{{ getErrorMessage('username') }}</mat-error>
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="full-width"
+          [class.field-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
           <mat-label>Senha</mat-label>
           <input matInput 
                  [type]="hidePassword ? 'password' : 'text'" 
                  formControlName="password" 
-                 autocomplete="current-password">
+                 autocomplete="current-password"
+                 aria-required="true"
+                 [attr.aria-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                 [attr.aria-describedby]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched ? 'password-error' : null">
           <button mat-icon-button matSuffix 
                   (click)="togglePasswordVisibility()" 
                   type="button"
-                  [disabled]="loading">
-            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  [disabled]="loading"
+                  [attr.aria-label]="hidePassword ? 'Mostrar senha' : 'Ocultar senha'">
+            <mat-icon aria-hidden="true">{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
           @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-            <mat-error>{{ getErrorMessage('password') }}</mat-error>
+            <mat-error id="password-error" role="alert">{{ getErrorMessage('password') }}</mat-error>
           }
         </mat-form-field>
 
         @if (error) {
-          <div class="error-message">
-            <mat-icon>error</mat-icon>
+          <div class="error-message" role="alert">
+            <mat-icon aria-hidden="true">error</mat-icon>
             {{ error }}
           </div>
         }
 
         <button mat-raised-button color="primary" type="submit" 
-                [disabled]="loading" class="full-width submit-button">
+                [disabled]="loading" class="full-width submit-button"
+                aria-label="Entrar no sistema">
           @if (loading) {
-            <mat-spinner diameter="20"></mat-spinner>
+            <mat-spinner diameter="20" aria-label="Autenticando"></mat-spinner>
             <span class="loading-text">Autenticando...</span>
           } @else {
             Entrar

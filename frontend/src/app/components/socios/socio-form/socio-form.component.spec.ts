@@ -383,4 +383,67 @@ describe('SocioFormComponent', () => {
       expect(component.getErrorMessage('nome')).toBe('');
     });
   });
+
+  describe('Success Confirmation and Navigation (Task 6.6)', () => {
+    it('should show success toast "Dados atualizados com sucesso" after updating socio', fakeAsync(() => {
+      // Requirement 2.11
+      activatedRoute.snapshot.paramMap.get.and.returnValue('1');
+      socioService.buscarSocio.and.returnValue(of(mockSocio));
+      socioService.atualizarSocio.and.returnValue(of(mockSocio));
+
+      fixture.detectChanges();
+      tick();
+
+      component.socioForm.patchValue({
+        nome: 'João Silva Updated',
+        cpf: '123.456.789-00',
+        matricula: 'MAT001'
+      });
+
+      component.onSubmit();
+      tick();
+
+      expect(snackBar.open).toHaveBeenCalledWith('Dados atualizados com sucesso', 'Fechar', { duration: 3000 });
+    }));
+
+    it('should navigate to socios list after successful save', fakeAsync(() => {
+      // Requirement 2.12
+      socioService.criarSocio.and.returnValue(of(mockSocio));
+
+      fixture.detectChanges();
+
+      component.socioForm.patchValue({
+        nome: 'João Silva',
+        cpf: '123.456.789-00',
+        matricula: 'MAT001'
+      });
+
+      component.onSubmit();
+      tick();
+
+      expect(router.navigate).toHaveBeenCalledWith(['/socios']);
+    }));
+
+    it('should navigate immediately when canceling without changes', () => {
+      // Requirement 2.13 - no changes
+      fixture.detectChanges();
+
+      component.onCancel();
+
+      expect(router.navigate).toHaveBeenCalledWith(['/socios']);
+    });
+
+    it('should detect unsaved changes', () => {
+      // Requirement 2.13
+      fixture.detectChanges();
+
+      // Initially no changes
+      expect(component['hasUnsavedChanges']()).toBeFalse();
+
+      // Make a change
+      component.socioForm.patchValue({ nome: 'Changed Name' });
+
+      expect(component['hasUnsavedChanges']()).toBeTrue();
+    });
+  });
 });

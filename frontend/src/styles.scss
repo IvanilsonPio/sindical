@@ -13,6 +13,97 @@ body {
   box-sizing: border-box;
 }
 
+/* Keyboard Navigation - Visible Focus Indicators */
+/* Ensures all interactive elements have clear focus indicators for keyboard navigation */
+
+/* Global focus styles for buttons */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+}
+
+/* Focus styles for Material buttons */
+.mat-mdc-button:focus-visible,
+.mat-mdc-raised-button:focus-visible,
+.mat-mdc-icon-button:focus-visible,
+.mat-mdc-fab:focus-visible,
+.mat-mdc-mini-fab:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+/* Focus styles for form inputs */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+/* Focus styles for Material form fields */
+.mat-mdc-form-field:focus-within {
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: #1976d2 !important;
+    border-width: 2px !important;
+  }
+}
+
+/* Focus styles for table rows and cells */
+tr:focus-visible,
+td:focus-visible,
+th:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: -2px;
+}
+
+/* Focus styles for chips */
+.mat-mdc-chip:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+/* Focus styles for cards (when focusable) */
+mat-card:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+/* Ensure focus is visible on warn/accent colored buttons */
+button[color="warn"]:focus-visible,
+.mat-mdc-raised-button.mat-warn:focus-visible {
+  outline-color: #f44336;
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2);
+}
+
+button[color="accent"]:focus-visible,
+.mat-mdc-raised-button.mat-accent:focus-visible {
+  outline-color: #ff4081;
+  box-shadow: 0 0 0 3px rgba(255, 64, 129, 0.2);
+}
+
+/* Remove default focus outline only when custom outline is applied */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+/* Ensure disabled elements don't show focus */
+button:disabled:focus,
+input:disabled:focus,
+select:disabled:focus,
+textarea:disabled:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 /* Responsive utilities */
 @media (max-width: 768px) {
   .hide-mobile {

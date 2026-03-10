@@ -215,3 +215,55 @@
     display: none;
   }
 }
+
+/* Keyboard Navigation - Focus Indicators */
+/* Ensures visible focus for all interactive elements in arquivo manager */
+
+/* Focus for action buttons */
+.action-buttons button:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+}
+
+/* Focus for warn colored buttons (delete) */
+.action-buttons button[color="warn"]:focus-visible {
+  outline-color: #f44336;
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2);
+}
+
+/* Focus for primary colored buttons (download) */
+.action-buttons button[color="primary"]:focus-visible {
+  outline-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+}
+
+/* Focus for accent colored buttons (view) */
+.action-buttons button[color="accent"]:focus-visible {
+  outline-color: #ff4081;
+  box-shadow: 0 0 0 3px rgba(255, 64, 129, 0.2);
+}
+
+/* Focus for refresh button */
+.header-actions button:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+/* Focus for table rows (for keyboard navigation) */
+.files-table tr:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: -2px;
+  background-color: rgba(25, 118, 210, 0.05);
+}
+
+/* Ensure buttons are keyboard accessible */
+button {
+  cursor: pointer;
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}

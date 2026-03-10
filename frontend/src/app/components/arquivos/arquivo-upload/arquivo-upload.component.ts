@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -41,39 +41,36 @@ export class ArquivoUploadComponent {
   isDragging = false;
   uploading = false;
   
-  // File validation constants (matching backend ArquivoConstants)
+  // File validation constants (Requirements 3.2, 3.3)
   private readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
   private readonly ALLOWED_TYPES = [
     'application/pdf',
     'image/jpeg',
     'image/jpg',
     'image/png',
-    'image/gif',
-    'image/bmp',
-    'image/webp',
     'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/vnd.ms-powerpoint',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    'text/plain',
-    'text/csv',
-    'application/zip',
-    'application/x-rar-compressed',
-    'application/x-7z-compressed'
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   ];
   
   private readonly ALLOWED_EXTENSIONS = [
-    'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv',
-    'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp',
-    'zip', 'rar', '7z'
+    'pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'
   ];
 
   constructor(
     private arquivoService: ArquivoService,
     private snackBar: MatSnackBar
   ) {}
+
+  /**
+   * Handle keyboard events for drop zone accessibility
+   * Enter or Space key triggers file selection dialog
+   */
+  onDropZoneKeydown(event: KeyboardEvent, fileInput: HTMLInputElement): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      fileInput.click();
+    }
+  }
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
@@ -122,11 +119,11 @@ export class ArquivoUploadComponent {
   }
 
   private validateFile(file: File): { valid: boolean; error?: string } {
-    // Check file size
+    // Requirement 3.3: Check file size (max 10MB)
     if (file.size > this.MAX_FILE_SIZE) {
       return {
         valid: false,
-        error: `Arquivo "${file.name}" excede o tamanho máximo de 10 MB`
+        error: `Arquivo excede o tamanho máximo permitido de 10MB` // Requirement 3.4
       };
     }
 
@@ -138,16 +135,16 @@ export class ArquivoUploadComponent {
       };
     }
 
-    // Check file type
-    if (!this.ALLOWED_TYPES.includes(file.type)) {
-      // Also check by extension as fallback
-      const extension = this.getFileExtension(file.name);
-      if (!this.ALLOWED_EXTENSIONS.includes(extension)) {
-        return {
-          valid: false,
-          error: `Tipo de arquivo "${file.name}" não permitido. Tipos aceitos: PDF, imagens, documentos Office, arquivos de texto e compactados`
-        };
-      }
+    // Requirement 3.2: Check file type
+    const extension = this.getFileExtension(file.name);
+    const isValidType = this.ALLOWED_TYPES.includes(file.type);
+    const isValidExtension = this.ALLOWED_EXTENSIONS.includes(extension);
+    
+    if (!isValidType && !isValidExtension) {
+      return {
+        valid: false,
+        error: `Tipo de arquivo não permitido. Formatos aceitos: PDF, DOC, DOCX, JPG, JPEG, PNG` // Requirement 3.5
+      };
     }
 
     return { valid: true };
@@ -215,18 +212,12 @@ export class ArquivoUploadComponent {
   getFileIcon(file: File): string {
     const extension = this.getFileExtension(file.name);
     
-    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension)) {
+    if (['jpg', 'jpeg', 'png'].includes(extension)) {
       return 'image';
     } else if (extension === 'pdf') {
       return 'picture_as_pdf';
     } else if (['doc', 'docx'].includes(extension)) {
       return 'description';
-    } else if (['xls', 'xlsx'].includes(extension)) {
-      return 'table_chart';
-    } else if (['ppt', 'pptx'].includes(extension)) {
-      return 'slideshow';
-    } else if (['zip', 'rar', '7z'].includes(extension)) {
-      return 'folder_zip';
     } else {
       return 'insert_drive_file';
     }

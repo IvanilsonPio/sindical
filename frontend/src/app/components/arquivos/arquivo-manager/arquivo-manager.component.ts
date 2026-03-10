@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ArquivoService } from '../../../services/arquivo.service';
 import { Arquivo } from '../../../models/arquivo.model';
 import { ArquivoUploadComponent } from '../arquivo-upload/arquivo-upload.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-arquivo-manager',
@@ -34,6 +35,7 @@ import { ArquivoUploadComponent } from '../arquivo-upload/arquivo-upload.compone
 export class ArquivoManagerComponent implements OnInit {
   @Input() socioId!: number;
   @Input() socioNome?: string;
+  @Output() arquivosChanged = new EventEmitter<void>();
   
   arquivos: Arquivo[] = [];
   loading = false;
@@ -55,8 +57,12 @@ export class ArquivoManagerComponent implements OnInit {
     this.loading = true;
     this.arquivoService.listarArquivos(this.socioId).subscribe({
       next: (arquivos) => {
-        this.arquivos = arquivos;
+        // Sort files by upload date in descending order (most recent first)
+        this.arquivos = this.sortArquivosByDate(arquivos);
         this.loading = false;
+        // Emit event to notify parent component that files have changed
+        // Requirements: 4.5 - Reload file list after upload/deletion
+        this.arquivosChanged.emit();
       },
       error: (error) => {
         this.snackBar.open('Erro ao carregar arquivos', 'Fechar', { duration: 3000 });
@@ -66,7 +72,36 @@ export class ArquivoManagerComponent implements OnInit {
   }
 
   onUploadComplete(arquivos: Arquivo[]): void {
+    // Reload file list after successful upload
+    // Requirements: 4.5 - Reload file list after upload
     this.carregarArquivos();
+  }
+
+  viewFile(arquivo: Arquivo): void {
+    // Check if file type is viewable in browser (PDF, images)
+    const viewableTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    const isViewable = viewableTypes.includes(arquivo.tipoConteudo.toLowerCase());
+    
+    if (!isViewable) {
+      this.snackBar.open('Este tipo de arquivo não pode ser visualizado no navegador', 'Fechar', { duration: 3000 });
+      return;
+    }
+    
+    this.arquivoService.downloadArquivo(arquivo.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        // Open in new tab for viewing
+        window.open(url, '_blank');
+        
+        // Clean up after a delay to ensure the file loads
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+        }, 100);
+      },
+      error: (error) => {
+        this.snackBar.open('Erro ao visualizar arquivo', 'Fechar', { duration: 3000 });
+      }
+    });
   }
 
   downloadArquivo(arquivo: Arquivo): void {
@@ -88,21 +123,45 @@ export class ArquivoManagerComponent implements OnInit {
   }
 
   excluirArquivo(arquivo: Arquivo): void {
-    if (confirm(`Tem certeza que deseja excluir o arquivo "${arquivo.nomeOriginal}"?`)) {
-      this.arquivoService.excluirArquivo(arquivo.id).subscribe({
-        next: () => {
-          this.snackBar.open('Arquivo excluído com sucesso', 'Fechar', { duration: 3000 });
-          this.carregarArquivos();
-        },
-        error: (error) => {
-          this.snackBar.open('Erro ao excluir arquivo', 'Fechar', { duration: 3000 });
-        }
-      });
-    }
+    const dialogData: ConfirmDialogData = {
+      title: 'Confirmar Exclusão',
+      message: `Deseja realmente excluir o arquivo "${arquivo.nomeOriginal}"?`,
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.loading = true;
+        this.arquivoService.excluirArquivo(arquivo.id).subscribe({
+          next: () => {
+            this.snackBar.open('Arquivo excluído com sucesso', 'Fechar', { duration: 3000 });
+            // Reload file list after successful deletion
+            // Requirements: 4.5 - Reload file list after deletion
+            this.carregarArquivos();
+          },
+          error: (error) => {
+            this.loading = false;
+            const errorMessage = error?.error?.message || 'Erro ao excluir arquivo. Tente novamente';
+            this.snackBar.open(errorMessage, 'Fechar', { duration: 5000 });
+          }
+        });
+      }
+    });
   }
 
   isImage(tipoConteudo: string): boolean {
     return tipoConteudo.startsWith('image/');
+  }
+
+  isViewable(tipoConteudo: string): boolean {
+    const viewableTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    return viewableTypes.includes(tipoConteudo.toLowerCase());
   }
 
   getThumbnailUrl(arquivo: Arquivo): string | null {
@@ -143,4 +202,41 @@ export class ArquivoManagerComponent implements OnInit {
       minute: '2-digit'
     });
   }
+
+  /**
+   * Sort files by upload date in descending order (most recent first)
+   * Validates: Requirements 3.18
+   */
+  sortArquivosByDate(arquivos: Arquivo[]): Arquivo[] {
+    return arquivos.sort((a, b) => {
+      const dateA = new Date(a.criadoEm).getTime();
+      const dateB = new Date(b.criadoEm).getTime();
+      return dateB - dateA; // Descending order
+    });
+  }
+
+  /**
+   * Format file size to human-readable format
+   * Validates: Requirements 3.18
+   */
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  }
+
+  /**
+   * Handle image load error by hiding the image element
+   */
+  onImageError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.style.display = 'none';
+    }
+  }
+
 }

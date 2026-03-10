@@ -41,6 +41,9 @@ class SocioServiceTest {
     @Mock
     private SocioHistoryService historyService;
     
+    @Mock
+    private AuditService auditService;
+    
     @InjectMocks
     private SocioService socioService;
     

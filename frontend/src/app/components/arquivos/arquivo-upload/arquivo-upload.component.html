@@ -14,9 +14,13 @@
       (dragover)="onDragOver($event)"
       (dragleave)="onDragLeave($event)"
       (drop)="onDrop($event)"
-      (click)="fileInput.click()">
+      (click)="fileInput.click()"
+      (keydown)="onDropZoneKeydown($event, fileInput)"
+      role="button"
+      tabindex="0"
+      aria-label="Área de upload de arquivos. Clique para selecionar arquivos ou arraste arquivos aqui">
       
-      <mat-icon class="upload-icon">cloud_upload</mat-icon>
+      <mat-icon class="upload-icon" aria-hidden="true">cloud_upload</mat-icon>
       <p class="drop-text">Arraste arquivos aqui ou clique para selecionar</p>
       <p class="drop-hint">
         Tipos aceitos: PDF, imagens (JPG, PNG, GIF), documentos Office, arquivos de texto e compactados
@@ -29,21 +33,23 @@
         multiple 
         style="display: none"
         (change)="onFileSelected($event)"
-        accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z">
+        accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z"
+        aria-label="Selecionar arquivos para upload">
     </div>
 
     <!-- Selected Files List -->
-    <div class="selected-files" *ngIf="selectedFiles.length > 0">
+    <div class="selected-files" *ngIf="selectedFiles.length > 0" role="region" aria-label="Arquivos selecionados">
       <h3>Arquivos Selecionados ({{ selectedFiles.length }})</h3>
       
       <div class="file-list">
-        <mat-chip-listbox>
+        <mat-chip-listbox aria-label="Lista de arquivos selecionados">
           <mat-chip-option 
             *ngFor="let fileItem of selectedFiles; let i = index"
             class="file-chip"
-            [disabled]="uploading">
+            [disabled]="uploading"
+            [attr.aria-label]="fileItem.file.name + ', ' + formatFileSize(fileItem.file.size)">
             
-            <mat-icon class="file-icon">{{ getFileIcon(fileItem.file) }}</mat-icon>
+            <mat-icon class="file-icon" aria-hidden="true">{{ getFileIcon(fileItem.file) }}</mat-icon>
             
             <span class="file-info">
               <span class="file-name">{{ fileItem.file.name }}</span>
@@ -54,16 +60,17 @@
               mat-icon-button 
               (click)="removeFile(i)"
               [disabled]="uploading"
-              matChipRemove>
-              <mat-icon>cancel</mat-icon>
+              matChipRemove
+              [attr.aria-label]="'Remover arquivo ' + fileItem.file.name">
+              <mat-icon aria-hidden="true">cancel</mat-icon>
             </button>
           </mat-chip-option>
         </mat-chip-listbox>
       </div>
 
       <!-- Upload Progress -->
-      <div class="upload-progress" *ngIf="uploading">
-        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      <div class="upload-progress" *ngIf="uploading" role="status" aria-live="polite">
+        <mat-progress-bar mode="indeterminate" aria-label="Progresso do upload"></mat-progress-bar>
         <p class="progress-text">Enviando arquivos...</p>
       </div>
     </div>
@@ -73,8 +80,9 @@
     <button 
       mat-button 
       (click)="clearAll()"
-      [disabled]="selectedFiles.length === 0 || uploading">
-      <mat-icon>clear_all</mat-icon>
+      [disabled]="selectedFiles.length === 0 || uploading"
+      aria-label="Limpar todos os arquivos selecionados">
+      <mat-icon aria-hidden="true">clear_all</mat-icon>
       Limpar Tudo
     </button>
     
@@ -82,8 +90,9 @@
       mat-raised-button 
       color="primary"
       (click)="uploadFiles()"
-      [disabled]="selectedFiles.length === 0 || uploading">
-      <mat-icon>cloud_upload</mat-icon>
+      [disabled]="selectedFiles.length === 0 || uploading"
+      [attr.aria-label]="'Enviar ' + selectedFiles.length + ' arquivo(s)'">
+      <mat-icon aria-hidden="true">cloud_upload</mat-icon>
       Enviar {{ selectedFiles.length > 0 ? '(' + selectedFiles.length + ')' : '' }}
     </button>
   </mat-card-actions>

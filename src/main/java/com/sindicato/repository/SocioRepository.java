@@ -139,4 +139,28 @@ public interface SocioRepository extends JpaRepository<Socio, Long> {
      * @return Número de sócios com o status especificado
      */
     long countByStatus(StatusSocio status);
+    
+    /**
+     * Busca um sócio por ID com pagamentos carregados.
+     * Utiliza JOIN FETCH para carregar pagamentos, evitando o problema N+1.
+     * 
+     * @param id ID do sócio
+     * @return Optional contendo o sócio com pagamentos carregados
+     */
+    @Query("SELECT DISTINCT s FROM Socio s " +
+           "LEFT JOIN FETCH s.pagamentos " +
+           "WHERE s.id = :id")
+    Optional<Socio> findByIdWithPagamentos(@Param("id") Long id);
+    
+    /**
+     * Busca um sócio por ID com arquivos carregados.
+     * Utiliza JOIN FETCH para carregar arquivos, evitando o problema N+1.
+     * 
+     * @param id ID do sócio
+     * @return Optional contendo o sócio com arquivos carregados
+     */
+    @Query("SELECT DISTINCT s FROM Socio s " +
+           "LEFT JOIN FETCH s.arquivos " +
+           "WHERE s.id = :id")
+    Optional<Socio> findByIdWithArquivos(@Param("id") Long id);
 }

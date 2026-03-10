@@ -134,7 +134,8 @@ export class SociosListComponent implements OnInit {
   }
 
   viewSocio(socio: Socio): void {
-    this.router.navigate(['/socios', socio.id]);
+    // Requirements: 4.6 - Maintain socioId context via route params
+    this.router.navigate(['/socios', socio.id, 'detalhes']);
   }
 
   editSocio(socio: Socio): void {
