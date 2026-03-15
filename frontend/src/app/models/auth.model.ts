@@ -16,6 +16,7 @@ export interface AuthResponse {
   refreshToken: string;
   username: string;
   nome: string;
+  role: string;
   success: boolean;
 }
 

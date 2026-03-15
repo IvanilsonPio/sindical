@@ -9,16 +9,18 @@ public class AuthResponse {
     private String refreshToken;
     private String username;
     private String nome;
+    private String role;
     private boolean success;
 
     public AuthResponse() {
     }
 
-    public AuthResponse(String token, String refreshToken, String username, String nome) {
+    public AuthResponse(String token, String refreshToken, String username, String nome, String role) {
         this.token = token;
         this.refreshToken = refreshToken;
         this.username = username;
         this.nome = nome;
+        this.role = role;
         this.success = true;
     }
 
@@ -60,5 +62,13 @@ public class AuthResponse {
 
     public void setSuccess(boolean success) {
         this.success = success;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

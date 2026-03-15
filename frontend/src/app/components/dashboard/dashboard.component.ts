@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { AuthService } from '../../services/auth.service';
 
 interface NavigationCard {
   title: string;
@@ -12,6 +13,7 @@ interface NavigationCard {
   icon: string;
   route: string;
   color: string;
+  adminOnly?: boolean;
 }
 
 @Component({
@@ -28,7 +30,9 @@ interface NavigationCard {
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent {
-  navigationCards: NavigationCard[] = [
+  isAdmin: boolean;
+
+  allCards: NavigationCard[] = [
     {
       title: 'Sócios',
       description: 'Gerenciar cadastro de sócios do sindicato',
@@ -49,10 +53,24 @@ export class DashboardComponent {
       icon: 'folder',
       route: '/arquivos',
       color: '#f57c00'
+    },
+    {
+      title: 'Usuários',
+      description: 'Gerenciar usuários e permissões de acesso',
+      icon: 'manage_accounts',
+      route: '/usuarios',
+      color: '#7b1fa2',
+      adminOnly: true
     }
   ];
 
-  constructor(private router: Router) {}
+  get navigationCards(): NavigationCard[] {
+    return this.allCards.filter(c => !c.adminOnly || this.isAdmin);
+  }
+
+  constructor(private router: Router, private authService: AuthService) {
+    this.isAdmin = this.authService.isAdmin();
+  }
 
   navigateTo(route: string): void {
     this.router.navigate([route]);

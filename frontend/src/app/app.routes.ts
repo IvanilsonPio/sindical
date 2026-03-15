@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 import { LoginComponent } from './components/login/login.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 
@@ -27,6 +28,11 @@ export const routes: Routes = [
     path: 'arquivos', 
     loadChildren: () => import('./components/arquivos/arquivos.routes').then(m => m.ARQUIVOS_ROUTES),
     canActivate: [authGuard]
+  },
+  {
+    path: 'usuarios',
+    loadComponent: () => import('./components/usuarios/usuarios.component').then(m => m.UsuariosComponent),
+    canActivate: [authGuard, adminGuard]
   },
   { 
     path: '', 

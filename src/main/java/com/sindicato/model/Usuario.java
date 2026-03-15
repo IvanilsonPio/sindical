@@ -1,13 +1,21 @@
 package com.sindicato.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 /**
  * Entidade que representa um usuário administrativo do sistema.
@@ -38,6 +46,10 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private StatusUsuario status = StatusUsuario.ATIVO;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private RoleUsuario role = RoleUsuario.OPERADOR;
     
     @CreationTimestamp
     @Column(name = "criado_em", nullable = false, updatable = false)
@@ -57,6 +69,15 @@ public class Usuario {
         this.password = password;
         this.nome = nome;
         this.status = StatusUsuario.ATIVO;
+        this.role = RoleUsuario.OPERADOR;
+    }
+
+    public Usuario(String username, String password, String nome, RoleUsuario role) {
+        this.username = username;
+        this.password = password;
+        this.nome = nome;
+        this.status = StatusUsuario.ATIVO;
+        this.role = role;
     }
     
     // Getters e Setters
@@ -99,6 +120,14 @@ public class Usuario {
     
     public void setStatus(StatusUsuario status) {
         this.status = status;
+    }
+
+    public RoleUsuario getRole() {
+        return role;
+    }
+
+    public void setRole(RoleUsuario role) {
+        this.role = role;
     }
     
     public LocalDateTime getCriadoEm() {

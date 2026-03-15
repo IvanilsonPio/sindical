@@ -122,6 +122,9 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
                         
+                        // Gestão de usuários - apenas ADMIN
+                        .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
+                        
                         // Todos os outros endpoints requerem autenticação
                         .anyRequest().authenticated()
                 )

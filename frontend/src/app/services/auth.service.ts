@@ -72,6 +72,10 @@ export class AuthService {
     return user ? JSON.parse(user) : null;
   }
 
+  isAdmin(): boolean {
+    return this.getUser()?.role === 'ADMIN';
+  }
+
   private setToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
   }

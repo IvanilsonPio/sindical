@@ -29,6 +29,7 @@ export class AppComponent {
   title = 'Sistema Sindicato Rural';
   userName: string = '';
   isAuthenticated: boolean = false;
+  isAdmin: boolean = false;
 
   constructor(
     private authService: AuthService,
@@ -39,6 +40,9 @@ export class AppComponent {
       if (isAuth) {
         const user = this.authService.getUser();
         this.userName = user?.nome || 'Administrador';
+        this.isAdmin = this.authService.isAdmin();
+      } else {
+        this.isAdmin = false;
       }
     });
   }

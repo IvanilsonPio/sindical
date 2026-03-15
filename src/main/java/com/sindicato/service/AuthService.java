@@ -1,11 +1,5 @@
 package com.sindicato.service;
 
-import com.sindicato.dto.AuthResponse;
-import com.sindicato.dto.LoginRequest;
-import com.sindicato.exception.InvalidCredentialsException;
-import com.sindicato.model.Usuario;
-import com.sindicato.repository.UsuarioRepository;
-import com.sindicato.util.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +7,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import com.sindicato.dto.AuthResponse;
+import com.sindicato.dto.LoginRequest;
+import com.sindicato.exception.InvalidCredentialsException;
+import com.sindicato.model.Usuario;
+import com.sindicato.repository.UsuarioRepository;
+import com.sindicato.util.JwtUtil;
 
 /**
  * Service for handling authentication operations including login, token generation, and validation.
@@ -60,7 +61,6 @@ public class AuthService {
                             request.getPassword()
                     )
             );
-
             // Load user details
             UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
             
@@ -72,8 +72,10 @@ public class AuthService {
             String token = jwtUtil.generateToken(userDetails);
             String refreshToken = jwtUtil.generateRefreshToken(userDetails);
 
-            return new AuthResponse(token, refreshToken, usuario.getUsername(), usuario.getNome());
+            return new AuthResponse(token, refreshToken, usuario.getUsername(), usuario.getNome(), usuario.getRole().name());
 
+        } catch (org.springframework.security.authentication.DisabledException e) {
+            throw new InvalidCredentialsException("Usuário inativo. Entre em contato com o administrador.");
         } catch (BadCredentialsException e) {
             throw new InvalidCredentialsException("Credenciais inválidas");
         }
@@ -101,7 +103,7 @@ public class AuthService {
             String newToken = jwtUtil.generateToken(userDetails);
             String newRefreshToken = jwtUtil.generateRefreshToken(userDetails);
 
-            return new AuthResponse(newToken, newRefreshToken, usuario.getUsername(), usuario.getNome());
+            return new AuthResponse(newToken, newRefreshToken, usuario.getUsername(), usuario.getNome(), usuario.getRole().name());
 
         } catch (Exception e) {
             throw new InvalidCredentialsException("Erro ao renovar token: " + e.getMessage());
