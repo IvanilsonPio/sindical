@@ -42,7 +42,7 @@ case $choice in
     1)
         echo ""
         echo "🚀 Iniciando ambiente de desenvolvimento..."
-        docker-compose -f docker-compose.dev.yml up -d
+        sudo docker compose -f docker-compose.dev.yml up -d
         echo ""
         echo "✅ PostgreSQL iniciado!"
         echo ""
