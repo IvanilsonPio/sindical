@@ -1,9 +1,13 @@
 #!/bin/sh
-# Garante que os diretórios existem mesmo após montagem de volumes
-mkdir -p "${FILE_UPLOAD_DIR:-/app/uploads}/arquivos-gerais"
-mkdir -p /app/logs
+set -e
 
-exec java \
+UPLOAD_DIR="${FILE_UPLOAD_DIR:-/data/uploads}"
+
+# Cria diretórios e corrige permissões (roda como root antes do drop)
+mkdir -p "${UPLOAD_DIR}/arquivos-gerais" "${UPLOAD_DIR}/recibos" /app/logs
+chown -R spring:spring "${UPLOAD_DIR}" /app/logs 2>/dev/null || true
+
+exec su-exec spring java \
   -XX:+UseContainerSupport \
   -XX:MaxRAMPercentage=60.0 \
   -XX:InitialRAMPercentage=30.0 \

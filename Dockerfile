@@ -17,12 +17,13 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Create non-root user and directories with correct ownership
-RUN apk add --no-cache curl \
+RUN apk add --no-cache curl su-exec \
     && addgroup -S spring && adduser -S spring -G spring \
     && mkdir -p /app/uploads/arquivos-gerais /app/logs \
     && chown -R spring:spring /app
 
-USER spring:spring
+# Run as root so entrypoint can fix volume permissions, then drops to spring
+# USER spring:spring  ← removed, entrypoint handles this
 
 # Copy the built JAR from build stage
 COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
