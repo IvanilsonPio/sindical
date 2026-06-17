@@ -6,7 +6,7 @@ spring:
   cache:
     type: caffeine
     caffeine:
-      spec: maximumSize=1000,expireAfterWrite=10m
+      spec: maximumSize=200,expireAfterWrite=10m
   
   jpa:
     hibernate:
@@ -32,6 +32,18 @@ spring:
       max-file-size: 10MB
       max-request-size: 50MB
 
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:ivanilsonpio@gmail.com}
+    password: ${MAIL_PASSWORD:eeos eoyi jzwy twwc}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 # Actuator Configuration
 management:
   endpoints:
@@ -51,6 +63,10 @@ jwt:
   secret: ${JWT_SECRET:minha-chave-secreta-super-segura-para-desenvolvimento-local-que-deve-ser-alterada-em-producao}
   expiration: 86400000 # 24 hours in milliseconds
   refresh-expiration: 604800000 # 7 days in milliseconds
+
+# App Configuration
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:4200}
 
 # File Storage Configuration
 file:
@@ -112,15 +128,16 @@ spring:
       on-profile: prod
   
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:sindicato_rural}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    # Suporta DATABASE_URL (Fly.io) ou variáveis separadas (Railway/Docker)
+    url: ${DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:sindicato_rural}}
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
     
     # Connection Pool Configuration (HikariCP) - Production optimized
     hikari:
-      maximum-pool-size: 20
-      minimum-idle: 10
+      maximum-pool-size: 5
+      minimum-idle: 2
       idle-timeout: 600000
       connection-timeout: 30000
       leak-detection-threshold: 60000

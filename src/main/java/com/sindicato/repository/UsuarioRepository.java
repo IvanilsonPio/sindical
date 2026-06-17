@@ -50,4 +50,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
      * @return true se existe um usuário com esse username
      */
     boolean existsByUsername(String username);
+
+    java.util.Optional<Usuario> findByEmail(String email);
+
+    java.util.Optional<Usuario> findByResetToken(String resetToken);
 }

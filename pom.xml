@@ -107,7 +107,13 @@
             <scope>test</scope>
         </dependency>
         
-        <!-- Property-based testing -->
+        <!-- PDF validation in tests (Apache License 2.0) -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.3</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>net.jqwik</groupId>
             <artifactId>jqwik</artifactId>
@@ -115,16 +121,17 @@
             <scope>test</scope>
         </dependency>
         
-        <!-- PDF Generation -->
+        <!-- PDF Generation (Apache License 2.0 / LGPL) -->
         <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>kernel</artifactId>
-            <version>7.2.5</version>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>flying-saucer-pdf-openpdf</artifactId>
+            <version>9.9.4</version>
         </dependency>
+
+        <!-- Email -->
         <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>layout</artifactId>
-            <version>7.2.5</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
     </dependencies>
 

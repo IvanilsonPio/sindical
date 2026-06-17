@@ -7,6 +7,7 @@ export interface UsuarioAdmin {
   id: number;
   username: string;
   nome: string;
+  email?: string;
   status: string;
   role: string;
   criadoEm: string;
@@ -44,5 +45,21 @@ export class UsuarioService {
 
   excluir(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  alterarPropriaSenha(senhaAtual: string, novaSenha: string, confirmacaoSenha: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/me/senha`, { senhaAtual, novaSenha, confirmacaoSenha });
+  }
+
+  resetarSenha(id: number, novaSenha: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/resetar-senha`, { novaSenha });
+  }
+
+  solicitarRecuperacao(email: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/recuperar-senha/solicitar`, { email });
+  }
+
+  redefinirSenhaComToken(token: string, novaSenha: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/recuperar-senha/redefinir`, { token, novaSenha });
   }
 }

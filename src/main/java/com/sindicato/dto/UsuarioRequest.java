@@ -22,6 +22,9 @@ public class UsuarioRequest {
     @NotNull(message = "Perfil é obrigatório")
     private RoleUsuario role;
 
+    @jakarta.validation.constraints.Email(message = "E-mail inválido")
+    private String email;
+
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 
@@ -33,4 +36,7 @@ public class UsuarioRequest {
 
     public RoleUsuario getRole() { return role; }
     public void setRole(RoleUsuario role) { this.role = role; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 }

@@ -119,10 +119,13 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/health/**",
+                                "/api/usuarios/recuperar-senha/**",
                                 "/error"
                         ).permitAll()
                         
                         // Gestão de usuários - apenas ADMIN
+                        // Exceto troca de própria senha, acessível por qualquer autenticado
+                        .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/usuarios/me/senha").authenticated()
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
                         
                         // Todos os outros endpoints requerem autenticação

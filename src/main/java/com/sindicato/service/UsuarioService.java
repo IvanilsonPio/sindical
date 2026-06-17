@@ -1,6 +1,8 @@
 package com.sindicato.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,10 +21,12 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     @Transactional(readOnly = true)
@@ -52,6 +56,7 @@ public class UsuarioService {
             request.getNome(),
             request.getRole()
         );
+        usuario.setEmail(request.getEmail());
 
         return usuarioRepository.save(usuario);
     }
@@ -69,6 +74,7 @@ public class UsuarioService {
         usuario.setUsername(request.getUsername());
         usuario.setNome(request.getNome());
         usuario.setRole(request.getRole());
+        usuario.setEmail(request.getEmail());
 
         // Só atualiza senha se foi fornecida
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
@@ -119,5 +125,59 @@ public class UsuarioService {
         }
 
         usuarioRepository.delete(usuario);
+    }
+
+    @Transactional
+    public void alterarPropriaSenha(String usernameLogado, com.sindicato.dto.AlterarSenhaRequest request) {
+        if (!request.getNovaSenha().equals(request.getConfirmacaoSenha())) {
+            throw new BusinessException("PASSWORD_MISMATCH", "Nova senha e confirmação não conferem");
+        }
+
+        Usuario usuario = usuarioRepository.findByUsername(usernameLogado)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario", "username", usernameLogado));
+
+        if (!passwordEncoder.matches(request.getSenhaAtual(), usuario.getPassword())) {
+            throw new BusinessException("WRONG_PASSWORD", "Senha atual incorreta");
+        }
+
+        usuario.setPassword(passwordEncoder.encode(request.getNovaSenha()));
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void resetarSenha(Long id, com.sindicato.dto.ResetarSenhaRequest request) {
+        Usuario usuario = buscar(id);
+        usuario.setPassword(passwordEncoder.encode(request.getNovaSenha()));
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void solicitarRecuperacaoSenha(String email) {
+        // Não revela se o e-mail existe ou não por segurança
+        usuarioRepository.findByEmail(email).ifPresent(usuario -> {
+            if (usuario.getStatus() != StatusUsuario.ATIVO) return;
+
+            String token = UUID.randomUUID().toString();
+            usuario.setResetToken(token);
+            usuario.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
+            usuarioRepository.save(usuario);
+
+            emailService.enviarRecuperacaoSenha(email, usuario.getNome(), token);
+        });
+    }
+
+    @Transactional
+    public void redefinirSenhaComToken(String token, String novaSenha) {
+        Usuario usuario = usuarioRepository.findByResetToken(token)
+            .orElseThrow(() -> new BusinessException("INVALID_TOKEN", "Token inválido ou expirado"));
+
+        if (usuario.getResetTokenExpiry() == null || LocalDateTime.now().isAfter(usuario.getResetTokenExpiry())) {
+            throw new BusinessException("EXPIRED_TOKEN", "Token expirado. Solicite uma nova recuperação de senha.");
+        }
+
+        usuario.setPassword(passwordEncoder.encode(novaSenha));
+        usuario.setResetToken(null);
+        usuario.setResetTokenExpiry(null);
+        usuarioRepository.save(usuario);
     }
 }

@@ -50,6 +50,16 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private RoleUsuario role = RoleUsuario.OPERADOR;
+
+    @jakarta.validation.constraints.Email(message = "E-mail inválido")
+    @Column(length = 150)
+    private String email;
+
+    @Column(name = "reset_token", length = 100)
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private java.time.LocalDateTime resetTokenExpiry;
     
     @CreationTimestamp
     @Column(name = "criado_em", nullable = false, updatable = false)
@@ -128,6 +138,30 @@ public class Usuario {
 
     public void setRole(RoleUsuario role) {
         this.role = role;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
+    }
+
+    public java.time.LocalDateTime getResetTokenExpiry() {
+        return resetTokenExpiry;
+    }
+
+    public void setResetTokenExpiry(java.time.LocalDateTime resetTokenExpiry) {
+        this.resetTokenExpiry = resetTokenExpiry;
     }
     
     public LocalDateTime getCriadoEm() {

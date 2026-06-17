@@ -80,4 +80,36 @@ public class UsuarioController {
         usuarioService.excluir(id, userDetails.getUsername());
         return ResponseEntity.noContent().build();
     }
+
+    // Endpoint acessível por qualquer usuário autenticado (não só ADMIN)
+    @PatchMapping("/me/senha")
+    public ResponseEntity<Void> alterarPropriaSenha(
+            @Valid @RequestBody com.sindicato.dto.AlterarSenhaRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        usuarioService.alterarPropriaSenha(userDetails.getUsername(), request);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Reset de senha por admin
+    @PatchMapping("/{id}/resetar-senha")
+    public ResponseEntity<Void> resetarSenha(
+            @PathVariable Long id,
+            @Valid @RequestBody com.sindicato.dto.ResetarSenhaRequest request) {
+        usuarioService.resetarSenha(id, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Endpoints públicos de recuperação de senha (sem autenticação)
+    @PostMapping("/recuperar-senha/solicitar")
+    public ResponseEntity<Void> solicitarRecuperacao(@RequestBody Map<String, String> body) {
+        usuarioService.solicitarRecuperacaoSenha(body.get("email"));
+        // Sempre retorna 204 para não revelar se o e-mail existe
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/recuperar-senha/redefinir")
+    public ResponseEntity<Void> redefinirSenha(@RequestBody Map<String, String> body) {
+        usuarioService.redefinirSenhaComToken(body.get("token"), body.get("novaSenha"));
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -10,6 +10,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { PastaService, Pasta } from '../../../services/pasta.service';
 import { ArquivoGeralService, ArquivoGeral } from '../../../services/arquivo-geral.service';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
+import { InputDialogComponent } from '../../shared/input-dialog/input-dialog.component';
 
 @Component({
   selector: 'app-arquivos-list',
@@ -162,66 +164,83 @@ export class ArquivosListComponent implements OnInit {
   }
 
   excluirArquivo(arquivo: ArquivoGeral): void {
-    if (!confirm(`Deseja realmente excluir o arquivo "${arquivo.nomeOriginal}"?`)) {
-      return;
-    }
-
-    this.arquivoService.excluirArquivo(arquivo.id).subscribe({
-      next: () => {
-        this.snackBar.open('Arquivo excluído com sucesso', 'Fechar', { duration: 3000 });
-        this.carregarArquivos();
-      },
-      error: (error) => {
-        this.snackBar.open('Erro ao excluir arquivo', 'Fechar', { duration: 3000 });
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Excluir Arquivo',
+        message: `Deseja realmente excluir o arquivo "${arquivo.nomeOriginal}"?`,
+        confirmText: 'Excluir'
       }
+    });
+
+    ref.afterClosed().subscribe(confirmado => {
+      if (!confirmado) return;
+      this.arquivoService.excluirArquivo(arquivo.id).subscribe({
+        next: () => {
+          this.snackBar.open('Arquivo excluído com sucesso', 'Fechar', { duration: 3000 });
+          this.carregarArquivos();
+        },
+        error: () => this.snackBar.open('Erro ao excluir arquivo', 'Fechar', { duration: 3000 })
+      });
     });
   }
 
   criarPasta(): void {
-    const nome = prompt('Nome da nova pasta:');
-    if (!nome) return;
-
-    this.loading = true;
-    const request = {
-      nome,
-      pastaPaiId: this.pastaAtual?.id
-    };
-
-    this.pastaService.criarPasta(request).subscribe({
-      next: (pasta) => {
-        this.snackBar.open('Pasta criada com sucesso', 'Fechar', { duration: 3000 });
-        if (this.pastaAtual) {
-          this.navegarParaPastaInicial(this.pastaAtual);
-        } else {
-          this.carregarRaiz();
-        }
-      },
-      error: (error) => {
-        this.snackBar.open('Erro ao criar pasta', 'Fechar', { duration: 3000 });
-        this.loading = false;
+    const ref = this.dialog.open(InputDialogComponent, {
+      data: {
+        title: 'Nova Pasta',
+        label: 'Nome da pasta',
+        confirmText: 'Criar'
       }
+    });
+
+    ref.afterClosed().subscribe(nome => {
+      if (!nome) return;
+      this.loading = true;
+      const request = { nome, pastaPaiId: this.pastaAtual?.id };
+
+      this.pastaService.criarPasta(request).subscribe({
+        next: () => {
+          this.snackBar.open('Pasta criada com sucesso', 'Fechar', { duration: 3000 });
+          if (this.pastaAtual) {
+            this.navegarParaPastaInicial(this.pastaAtual);
+          } else {
+            this.carregarRaiz();
+          }
+        },
+        error: () => {
+          this.snackBar.open('Erro ao criar pasta', 'Fechar', { duration: 3000 });
+          this.loading = false;
+        }
+      });
     });
   }
 
   excluirPasta(pasta: Pasta): void {
-    if (!confirm(`Deseja realmente excluir a pasta "${pasta.nome}"?`)) {
-      return;
-    }
-
-    this.loading = true;
-    this.pastaService.excluirPasta(pasta.id).subscribe({
-      next: () => {
-        this.snackBar.open('Pasta excluída com sucesso', 'Fechar', { duration: 3000 });
-        if (this.pastaAtual) {
-          this.navegarParaPastaInicial(this.pastaAtual);
-        } else {
-          this.carregarRaiz();
-        }
-      },
-      error: (error) => {
-        this.snackBar.open('Erro ao excluir pasta', 'Fechar', { duration: 3000 });
-        this.loading = false;
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Excluir Pasta',
+        message: `Deseja realmente excluir a pasta "${pasta.nome}"?`,
+        confirmText: 'Excluir'
       }
+    });
+
+    ref.afterClosed().subscribe(confirmado => {
+      if (!confirmado) return;
+      this.loading = true;
+      this.pastaService.excluirPasta(pasta.id).subscribe({
+        next: () => {
+          this.snackBar.open('Pasta excluída com sucesso', 'Fechar', { duration: 3000 });
+          if (this.pastaAtual) {
+            this.navegarParaPastaInicial(this.pastaAtual);
+          } else {
+            this.carregarRaiz();
+          }
+        },
+        error: () => {
+          this.snackBar.open('Erro ao excluir pasta', 'Fechar', { duration: 3000 });
+          this.loading = false;
+        }
+      });
     });
   }
 

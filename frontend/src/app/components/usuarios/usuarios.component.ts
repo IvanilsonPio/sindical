@@ -14,6 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { Inject } from '@angular/core';
 import { UsuarioService, UsuarioAdmin, UsuarioRequest } from '../../services/usuario.service';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-usuarios',
@@ -85,6 +86,9 @@ import { UsuarioService, UsuarioAdmin, UsuarioRequest } from '../../services/usu
                   (click)="alterarStatus(u)">
                   <mat-icon>{{ u.status === 'ATIVO' ? 'block' : 'check_circle' }}</mat-icon>
                 </button>
+                <button mat-icon-button matTooltip="Resetar senha" (click)="resetarSenha(u)">
+                  <mat-icon>lock_reset</mat-icon>
+                </button>
                 <button mat-icon-button matTooltip="Excluir" color="warn" (click)="excluir(u)">
                   <mat-icon>delete</mat-icon>
                 </button>
@@ -141,32 +145,60 @@ export class UsuariosComponent implements OnInit {
     const novoStatus = usuario.status === 'ATIVO' ? 'INATIVO' : 'ATIVO';
     const acao = novoStatus === 'ATIVO' ? 'ativar' : 'desativar';
 
-    if (!confirm(`Deseja realmente ${acao} o usuário "${usuario.nome}"?`)) return;
-
-    this.usuarioService.alterarStatus(usuario.id, novoStatus).subscribe({
-      next: () => {
-        this.snackBar.open(`Usuário ${acao === 'ativar' ? 'ativado' : 'desativado'} com sucesso`, 'Fechar', { duration: 3000 });
-        this.carregar();
-      },
-      error: (err) => {
-        const msg = err.error?.message || `Erro ao ${acao} usuário`;
-        this.snackBar.open(msg, 'Fechar', { duration: 4000 });
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: novoStatus === 'ATIVO' ? 'Ativar Usuário' : 'Desativar Usuário',
+        message: `Deseja realmente ${acao} o usuário "${usuario.nome}"?`,
+        confirmText: novoStatus === 'ATIVO' ? 'Ativar' : 'Desativar'
       }
+    });
+
+    ref.afterClosed().subscribe(confirmado => {
+      if (!confirmado) return;
+      this.usuarioService.alterarStatus(usuario.id, novoStatus).subscribe({
+        next: () => {
+          this.snackBar.open(`Usuário ${acao === 'ativar' ? 'ativado' : 'desativado'} com sucesso`, 'Fechar', { duration: 3000 });
+          this.carregar();
+        },
+        error: (err) => {
+          const msg = err.error?.message || `Erro ao ${acao} usuário`;
+          this.snackBar.open(msg, 'Fechar', { duration: 4000 });
+        }
+      });
     });
   }
 
   excluir(usuario: UsuarioAdmin): void {
-    if (!confirm(`Deseja realmente excluir o usuário "${usuario.nome}"?`)) return;
-
-    this.usuarioService.excluir(usuario.id).subscribe({
-      next: () => {
-        this.snackBar.open('Usuário excluído com sucesso', 'Fechar', { duration: 3000 });
-        this.carregar();
-      },
-      error: (err) => {
-        const msg = err.error?.message || 'Erro ao excluir usuário';
-        this.snackBar.open(msg, 'Fechar', { duration: 4000 });
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Excluir Usuário',
+        message: `Deseja realmente excluir o usuário "${usuario.nome}"?`,
+        confirmText: 'Excluir'
       }
+    });
+
+    ref.afterClosed().subscribe(confirmado => {
+      if (!confirmado) return;
+      this.usuarioService.excluir(usuario.id).subscribe({
+        next: () => {
+          this.snackBar.open('Usuário excluído com sucesso', 'Fechar', { duration: 3000 });
+          this.carregar();
+        },
+        error: (err) => {
+          const msg = err.error?.message || 'Erro ao excluir usuário';
+          this.snackBar.open(msg, 'Fechar', { duration: 4000 });
+        }
+      });
+    });
+  }
+
+  resetarSenha(usuario: UsuarioAdmin): void {
+    const ref = this.dialog.open(ResetarSenhaDialogComponent, {
+      width: '400px',
+      data: usuario
+    });
+    ref.afterClosed().subscribe(result => {
+      if (result) this.snackBar.open('Senha redefinida com sucesso', 'Fechar', { duration: 3000 });
     });
   }
 }
@@ -207,6 +239,12 @@ export class UsuariosComponent implements OnInit {
         </mat-form-field>
 
         <mat-form-field appearance="outline">
+          <mat-label>E-mail</mat-label>
+          <input matInput type="email" formControlName="email">
+          <mat-error *ngIf="form.get('email')?.hasError('email')">E-mail inválido</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
           <mat-label>Perfil</mat-label>
           <mat-select formControlName="role">
             <mat-option value="ADMIN">Administrador</mat-option>
@@ -238,6 +276,7 @@ export class UsuarioFormDialogComponent {
       nome: [data?.nome || '', Validators.required],
       username: [data?.username || '', Validators.required],
       password: ['', data ? [] : [Validators.required, Validators.minLength(6)]],
+      email: [data?.email || '', [Validators.email]],
       role: [data?.role || 'OPERADOR', Validators.required]
     });
   }
@@ -261,6 +300,75 @@ export class UsuarioFormDialogComponent {
       },
       error: (err) => {
         const msg = err.error?.message || 'Erro ao salvar usuário';
+        this.snackBar.open(msg, 'Fechar', { duration: 4000 });
+      }
+    });
+  }
+}
+
+// Dialog de reset de senha (admin)
+@Component({
+  selector: 'app-resetar-senha-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule
+  ],
+  template: `
+    <h2 mat-dialog-title>Redefinir Senha — {{ data.nome }}</h2>
+    <mat-dialog-content>
+      <form [formGroup]="form" class="form">
+        <mat-form-field appearance="outline">
+          <mat-label>Nova senha</mat-label>
+          <input matInput type="password" formControlName="novaSenha">
+          <mat-error *ngIf="form.get('novaSenha')?.hasError('required')">Obrigatório</mat-error>
+          <mat-error *ngIf="form.get('novaSenha')?.hasError('minlength')">Mínimo 6 caracteres</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Confirmar nova senha</mat-label>
+          <input matInput type="password" formControlName="confirmacao">
+          <mat-error *ngIf="form.hasError('mismatch') && form.get('confirmacao')?.touched">
+            As senhas não conferem
+          </mat-error>
+        </mat-form-field>
+      </form>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Cancelar</button>
+      <button mat-raised-button color="warn" [disabled]="form.invalid" (click)="salvar()">
+        Redefinir
+      </button>
+    </mat-dialog-actions>
+  `,
+  styles: [`.form { display: flex; flex-direction: column; gap: 1rem; padding-top: 0.5rem; min-width: 320px; }`]
+})
+export class ResetarSenhaDialogComponent {
+  form: FormGroup;
+
+  constructor(
+    private fb: FormBuilder,
+    private usuarioService: UsuarioService,
+    private snackBar: MatSnackBar,
+    private dialogRef: MatDialogRef<ResetarSenhaDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: UsuarioAdmin
+  ) {
+    this.form = this.fb.group({
+      novaSenha: ['', [Validators.required, Validators.minLength(6)]],
+      confirmacao: ['', Validators.required]
+    }, { validators: (g) => g.get('novaSenha')?.value === g.get('confirmacao')?.value ? null : { mismatch: true } });
+  }
+
+  salvar(): void {
+    if (this.form.invalid) return;
+
+    this.usuarioService.resetarSenha(this.data.id, this.form.value.novaSenha).subscribe({
+      next: () => this.dialogRef.close(true),
+      error: (err) => {
+        const msg = err.error?.message || 'Erro ao redefinir senha';
         this.snackBar.open(msg, 'Fechar', { duration: 4000 });
       }
     });

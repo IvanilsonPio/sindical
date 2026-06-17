@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            color: #000;
+            margin: 0;
+            padding: 0;
+        }
+        .titulo {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .subtitulo {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .segunda-via {
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: red;
+            margin-bottom: 14px;
+        }
+        .espaco {
+            margin-bottom: 14px;
+        }
+        .header-linha {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 14px;
+        }
+        .header-linha td {
+            padding: 0;
+            border: none;
+        }
+        .secao-titulo {
+            font-size: 12px;
+            font-weight: bold;
+            background-color: #f0f0f0;
+            padding: 5px;
+            margin-bottom: 8px;
+        }
+        table.dados {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 14px;
+        }
+        table.dados td {
+            padding: 0 0 4px 0;
+            border: none;
+            vertical-align: top;
+        }
+        table.dados td.label {
+            font-weight: bold;
+            width: 35%;
+        }
+        table.total {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            margin-bottom: 18px;
+        }
+        table.total td {
+            padding: 8px;
+            border: 1px solid #000;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        table.total td.label-total {
+            background-color: #f0f0f0;
+            text-align: right;
+            width: 50%;
+        }
+        table.total td.valor-total {
+            background-color: #ffffc8;
+            text-align: center;
+        }
+        .assinatura {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+        .rodape {
+            text-align: center;
+            font-size: 8px;
+            color: #888;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="titulo">SINDICATO DOS TRABALHADORES RURAIS</div>
+    <div class="subtitulo">RECIBO DE PAGAMENTO</div>
+
+    <!-- Segunda via -->
+    <div th:if="${segundaVia}" class="segunda-via">*** SEGUNDA VIA ***</div>
+    <div th:unless="${segundaVia}" class="espaco"> </div>
+
+    <!-- Número e data -->
+    <table class="header-linha">
+        <tr>
+            <td><strong>Recibo Nº: [[${numeroRecibo}]]</strong></td>
+            <td style="text-align: right;"><strong>Data: [[${dataPagamento}]]</strong></td>
+        </tr>
+    </table>
+
+    <!-- Dados do sócio -->
+    <div class="secao-titulo">DADOS DO SÓCIO</div>
+    <table class="dados">
+        <tr>
+            <td class="label">Nome:</td>
+            <td>[[${nome}]]</td>
+        </tr>
+        <tr>
+            <td class="label">CPF:</td>
+            <td>[[${cpf}]]</td>
+        </tr>
+        <tr>
+            <td class="label">Matrícula:</td>
+            <td>[[${matricula}]]</td>
+        </tr>
+        <tr th:if="${telefone != null and !#strings.isEmpty(telefone)}">
+            <td class="label">Telefone:</td>
+            <td>[[${telefone}]]</td>
+        </tr>
+        <tr th:if="${endereco != null and !#strings.isEmpty(endereco)}">
+            <td class="label">Endereço:</td>
+            <td>[[${endereco}]]</td>
+        </tr>
+    </table>
+
+    <!-- Dados do pagamento -->
+    <div class="secao-titulo">DADOS DO PAGAMENTO</div>
+    <table class="dados">
+        <tr>
+            <td class="label">Período:</td>
+            <td>[[${periodo}]]</td>
+        </tr>
+        <tr>
+            <td class="label">Valor:</td>
+            <td>[[${valor}]]</td>
+        </tr>
+        <tr>
+            <td class="label">Data do Pagamento:</td>
+            <td>[[${dataPagamento}]]</td>
+        </tr>
+        <tr th:if="${observacoes != null and !#strings.isEmpty(observacoes)}">
+            <td class="label">Observações:</td>
+            <td>[[${observacoes}]]</td>
+        </tr>
+    </table>
+
+    <!-- Total -->
+    <table class="total">
+        <tr>
+            <td class="label-total">VALOR TOTAL PAGO:</td>
+            <td class="valor-total">[[${valor}]]</td>
+        </tr>
+    </table>
+
+    <!-- Assinatura -->
+    <div class="assinatura">__________________________________________________</div>
+    <div class="assinatura">Assinatura do Responsável</div>
+
+    <!-- Rodapé -->
+    <div class="rodape">Recibo gerado em [[${dataGeracao}]] | Sistema de Gerenciamento do Sindicato Rural</div>
+</body>
+</html>

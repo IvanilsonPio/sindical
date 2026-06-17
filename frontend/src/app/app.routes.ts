@@ -9,6 +9,14 @@ export const routes: Routes = [
     path: 'login', 
     component: LoginComponent 
   },
+  {
+    path: 'recuperar-senha',
+    loadComponent: () => import('./components/recuperar-senha/solicitar-recuperacao.component').then(m => m.SolicitarRecuperacaoComponent)
+  },
+  {
+    path: 'recuperar-senha/redefinir',
+    loadComponent: () => import('./components/recuperar-senha/redefinir-senha.component').then(m => m.RedefinirSenhaComponent)
+  },
   { 
     path: 'dashboard', 
     component: DashboardComponent,
@@ -33,6 +41,11 @@ export const routes: Routes = [
     path: 'usuarios',
     loadComponent: () => import('./components/usuarios/usuarios.component').then(m => m.UsuariosComponent),
     canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'alterar-senha',
+    loadComponent: () => import('./components/alterar-senha/alterar-senha.component').then(m => m.AlterarSenhaComponent),
+    canActivate: [authGuard]
   },
   { 
     path: '', 

@@ -1,24 +1,25 @@
 package com.sindicato.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sindicato.dto.AuthResponse;
-import com.sindicato.dto.LoginRequest;
-import com.sindicato.exception.InvalidCredentialsException;
-import com.sindicato.exception.SessionExpiredException;
-import com.sindicato.service.AuthService;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sindicato.dto.AuthResponse;
+import com.sindicato.dto.LoginRequest;
+import com.sindicato.exception.InvalidCredentialsException;
+import com.sindicato.exception.SessionExpiredException;
+import com.sindicato.service.AuthService;
 
 /**
  * Unit tests for AuthController.
@@ -44,7 +45,8 @@ class AuthControllerTest {
                 "access-token",
                 "refresh-token",
                 "admin",
-                "Administrator"
+                "Administrator",
+                "ROLE_ADMIN"
         );
 
         when(authService.authenticate(any(LoginRequest.class))).thenReturn(response);
@@ -109,7 +111,8 @@ class AuthControllerTest {
                 "new-access-token",
                 "new-refresh-token",
                 "admin",
-                "Administrator"
+                "Administrator",
+                "ROLE_ADMIN"
         );
 
         when(authService.refreshToken(anyString())).thenReturn(response);
