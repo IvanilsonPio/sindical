@@ -59,9 +59,9 @@ fly secrets set \
   JWT_SECRET=$(openssl rand -base64 32) \
   MAIL_HOST=smtp.gmail.com \
   MAIL_PORT=587 \
-  MAIL_USERNAME=seu-email@gmail.com \
-  MAIL_PASSWORD=sua-senha-de-app \
-  FRONTEND_URL=https://seu-frontend.vercel.app \
+  MAIL_USERNAME=ivanilsonpio@gmail.com \
+  MAIL_PASSWORD='eeos eoyi jzwy twwc' \
+  FRONTEND_URL=https://sindical-beta.vercel.app \
   --app sindicato-rural-backend
 ```
 
@@ -74,7 +74,6 @@ fly secrets list --app sindicato-rural-backend
 
 # Setar as variáveis que o application.yml espera
 fly secrets set \
-  DB_HOST=<PGHOST do postgres> \
   DB_PORT=<PGPORT> \
   DB_NAME=<PGDATABASE> \
   DB_USERNAME=<PGUSER> \
@@ -135,3 +134,21 @@ fly secrets list --app sindicato-rural-backend
 # Escalar para zero (economizar)
 fly scale count 0 --app sindicato-rural-backend
 ```
+
+
+
+Postgres cluster sindicato-rural-db created
+  Username:    postgres
+  Password:    l4KcGoO7Oexl3Mm
+  Hostname:    sindicato-rural-db.internal
+  Flycast:     fdaa:82:f20c:0:1::3
+  Proxy port:  5432
+  Postgres port:  5433
+  Connection string: postgres://postgres:l4KcGoO7Oexl3Mm@sindicato-rural-db.flycast:5432
+
+
+  DB_PORT=5432
+DB_NAME=postgres
+DB_USERNAME=postgres
+DB_PASSWORD=cmbiXXLxrEhT87j
+DB_HOST=sindicato-rural-db.flycast
