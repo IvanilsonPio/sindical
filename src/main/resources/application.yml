@@ -6,7 +6,7 @@ spring:
   cache:
     type: caffeine
     caffeine:
-      spec: maximumSize=200,expireAfterWrite=10m
+      spec: maximumSize=50,expireAfterWrite=10m
   
   jpa:
     hibernate:
@@ -15,7 +15,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+        format_sql: false
         jdbc:
           time_zone: America/Sao_Paulo
     open-in-view: false
@@ -44,19 +44,22 @@ spring:
           starttls:
             enable: true
 
-# Actuator Configuration
+# Actuator Configuration - apenas health para reduzir overhead de métricas
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health
       base-path: /actuator
   endpoint:
     health:
-      show-details: when-authorized
+      show-details: never
   health:
     defaults:
       enabled: true
+  metrics:
+    enable:
+      all: false
 
 # JWT Configuration
 jwt:
@@ -149,13 +152,21 @@ spring:
       ddl-auto: validate
     show-sql: false
 
+  # Reduz threads do Tomcat para economizar memória
+  web:
+    server:
+      tomcat:
+        threads:
+          max: 20
+          min-spare: 5
+        max-connections: 100
+
 logging:
   level:
     com.sindicato: INFO
     org.springframework.security: WARN
     org.hibernate: WARN
-  file:
-    name: logs/sindicato-rural.log
+    org.flywaydb: WARN
 
 ---
 # Test Profile
