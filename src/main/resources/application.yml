@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:prod}
   
   # Cache Configuration
   cache:
@@ -130,9 +130,9 @@ spring:
   datasource:
     # DATABASE_URL é convertida automaticamente pelo DatabaseUrlConfig (EnvironmentPostProcessor)
     # Fallback para variáveis separadas caso DATABASE_URL não esteja definida
-    url: ${spring.datasource.url:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:sindicato_rural}}
-    username: ${spring.datasource.username:${DB_USERNAME:}}
-    password: ${spring.datasource.password:${DB_PASSWORD:}}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:sindicato_rural}
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
     
     # Connection Pool Configuration (HikariCP) - Production optimized
