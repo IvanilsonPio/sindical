@@ -129,7 +129,7 @@ spring:
   
   datasource:
     # Suporta DATABASE_URL (Fly.io) ou variáveis separadas (Railway/Docker)
-    url: ${DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:sindicato_rural}}
+    url: ${DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:sindicato_rural}?sslmode=disable}
     username: ${DB_USERNAME:}
     password: ${DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
