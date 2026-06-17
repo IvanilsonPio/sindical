@@ -137,8 +137,8 @@ spring:
     
     # Connection Pool Configuration (HikariCP) - Production optimized
     hikari:
-      maximum-pool-size: 5
-      minimum-idle: 2
+      maximum-pool-size: 3
+      minimum-idle: 1
       idle-timeout: 600000
       connection-timeout: 30000
       leak-detection-threshold: 60000

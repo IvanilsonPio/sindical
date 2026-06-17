@@ -5,8 +5,10 @@ mkdir -p /app/logs
 
 exec java \
   -XX:+UseContainerSupport \
-  -XX:MaxRAMPercentage=75.0 \
-  -XX:+UseG1GC \
+  -XX:MaxRAMPercentage=60.0 \
+  -XX:InitialRAMPercentage=30.0 \
+  -XX:+UseSerialGC \
+  -XX:MaxMetaspaceSize=128m \
   -Djava.security.egd=file:/dev/./urandom \
   -Dspring.jmx.enabled=false \
   -Dspring.profiles.active=prod \
