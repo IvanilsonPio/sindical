@@ -9,12 +9,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://sindicato-rural-backend.fly.dev/api/:path*"
-    }
-  ],
-  "routes": [
+    },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
