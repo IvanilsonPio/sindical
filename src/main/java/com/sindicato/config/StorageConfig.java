@@ -26,20 +26,25 @@ public class StorageConfig {
     
     @PostConstruct
     public void init() {
-        try {
-            // Create main upload directory
-            Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
-            Files.createDirectories(uploadPath);
-            logger.info("Upload directory created/verified: {}", uploadPath);
-            
-            // Create receipts subdirectory
-            Path recibosPath = uploadPath.resolve("recibos");
-            Files.createDirectories(recibosPath);
-            logger.info("Receipts directory created/verified: {}", recibosPath);
-            
-        } catch (IOException e) {
-            logger.error("Could not create upload directories", e);
-            throw new RuntimeException("Could not create upload directories", e);
+        String[] dirs = { uploadDir, uploadDir + "/recibos", uploadDir + "/arquivos-gerais" };
+        
+        for (String dir : dirs) {
+            Path path = Paths.get(dir).toAbsolutePath().normalize();
+            try {
+                Files.createDirectories(path);
+                logger.info("Directory created/verified: {}", path);
+            } catch (IOException e) {
+                // Fallback para /tmp se não tiver permissão no diretório configurado
+                logger.warn("Cannot create directory {}: {}. Falling back to /tmp.", path, e.getMessage());
+                Path tmpPath = Paths.get(System.getProperty("java.io.tmpdir"), "sindicato",
+                        path.getFileName().toString()).toAbsolutePath().normalize();
+                try {
+                    Files.createDirectories(tmpPath);
+                    logger.info("Using temp directory: {}", tmpPath);
+                } catch (IOException ex2) {
+                    logger.error("Could not create temp directory either: {}", tmpPath, ex2);
+                }
+            }
         }
     }
     
