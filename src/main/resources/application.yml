@@ -152,14 +152,12 @@ spring:
       ddl-auto: validate
     show-sql: false
 
-  # Reduz threads do Tomcat para economizar memória
-  web:
-    server:
-      tomcat:
-        threads:
-          max: 20
-          min-spare: 5
-        max-connections: 100
+  # Undertow - mais leve que Tomcat
+  server:
+    undertow:
+      threads:
+        worker: 20
+        io: 2
 
 logging:
   level:
