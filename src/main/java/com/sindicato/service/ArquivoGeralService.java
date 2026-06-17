@@ -36,7 +36,7 @@ public class ArquivoGeralService {
     private final ArquivoGeralRepository arquivoGeralRepository;
     private final PastaService pastaService;
     private final AuditService auditService;
-    private final Path fileStorageLocation;
+    private Path fileStorageLocation;
     
     public ArquivoGeralService(
             ArquivoGeralRepository arquivoGeralRepository,
@@ -54,11 +54,21 @@ public class ArquivoGeralService {
             Files.createDirectories(this.fileStorageLocation);
             logger.info("Diretório de arquivos gerais criado/verificado: {}", this.fileStorageLocation);
         } catch (IOException ex) {
-            logger.error("Erro ao criar diretório de arquivos gerais: {}", this.fileStorageLocation, ex);
-            throw new BusinessException(
-                "FILE_STORAGE_INIT_ERROR",
-                "Não foi possível criar o diretório de armazenamento de arquivos gerais"
-            );
+            logger.warn("Não foi possível criar o diretório {}: {}. Tentando diretório temporário.", 
+                this.fileStorageLocation, ex.getMessage());
+            // Fallback para diretório temporário do sistema
+            this.fileStorageLocation = Paths.get(System.getProperty("java.io.tmpdir"), "sindicato", DIRETORIO_ARQUIVOS_GERAIS)
+                .toAbsolutePath().normalize();
+            try {
+                Files.createDirectories(this.fileStorageLocation);
+                logger.info("Usando diretório temporário: {}", this.fileStorageLocation);
+            } catch (IOException ex2) {
+                logger.error("Erro ao criar diretório temporário: {}", this.fileStorageLocation, ex2);
+                throw new BusinessException(
+                    "FILE_STORAGE_INIT_ERROR",
+                    "Não foi possível criar o diretório de armazenamento de arquivos gerais"
+                );
+            }
         }
     }
     

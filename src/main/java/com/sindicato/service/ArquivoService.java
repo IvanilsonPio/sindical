@@ -40,7 +40,7 @@ public class ArquivoService {
     private final ArquivoRepository arquivoRepository;
     private final SocioRepository socioRepository;
     private final AuditService auditService;
-    private final Path fileStorageLocation;
+    private Path fileStorageLocation;
     
     /**
      * Construtor que inicializa o serviço e cria o diretório de armazenamento.
@@ -65,11 +65,20 @@ public class ArquivoService {
             Files.createDirectories(this.fileStorageLocation);
             logger.info("Diretório de armazenamento criado/verificado: {}", this.fileStorageLocation);
         } catch (IOException ex) {
-            logger.error("Erro ao criar diretório de armazenamento: {}", this.fileStorageLocation, ex);
-            throw new BusinessException(
-                "FILE_STORAGE_INIT_ERROR",
-                "Não foi possível criar o diretório de armazenamento de arquivos"
-            );
+            logger.warn("Não foi possível criar o diretório {}: {}. Tentando diretório temporário.",
+                this.fileStorageLocation, ex.getMessage());
+            this.fileStorageLocation = Paths.get(System.getProperty("java.io.tmpdir"), "sindicato", "uploads")
+                .toAbsolutePath().normalize();
+            try {
+                Files.createDirectories(this.fileStorageLocation);
+                logger.info("Usando diretório temporário: {}", this.fileStorageLocation);
+            } catch (IOException ex2) {
+                logger.error("Erro ao criar diretório temporário: {}", this.fileStorageLocation, ex2);
+                throw new BusinessException(
+                    "FILE_STORAGE_INIT_ERROR",
+                    "Não foi possível criar o diretório de armazenamento de arquivos"
+                );
+            }
         }
     }
     
