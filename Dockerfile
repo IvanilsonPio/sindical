@@ -17,7 +17,8 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Create non-root user and directories with correct ownership
-RUN addgroup -S spring && adduser -S spring -G spring \
+RUN apk add --no-cache curl \
+    && addgroup -S spring && adduser -S spring -G spring \
     && mkdir -p /app/uploads/arquivos-gerais /app/logs \
     && chown -R spring:spring /app
 
@@ -31,9 +32,9 @@ RUN chmod +x docker-entrypoint.sh
 # Expose application port
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+# Health check - start-period allows time for JVM and Spring to fully start
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 # Run the application
 ENTRYPOINT ["./docker-entrypoint.sh"]
