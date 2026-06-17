@@ -3,8 +3,7 @@ set -e
 
 UPLOAD_DIR="${FILE_UPLOAD_DIR:-/data/uploads}"
 
-# Aguarda o volume ser montado pelo Railway
-# Detecta montagem real verificando /proc/mounts, não apenas se o diretório existe
+# Aguarda o volume ser montado pelo Railway via /proc/mounts
 echo "Aguardando montagem do volume em ${UPLOAD_DIR}..."
 i=0
 while [ $i -lt 60 ]; do
@@ -17,14 +16,14 @@ while [ $i -lt 60 ]; do
 done
 
 if [ $i -eq 60 ]; then
-  echo "Timeout aguardando volume. Continuando com diretório local..."
+  echo "Timeout aguardando volume. Continuando..."
 fi
 
-# Cria subdiretórios e ajusta permissões
+# Cria subdiretórios (rodando como root, tem permissão total no volume)
 mkdir -p "${UPLOAD_DIR}/arquivos-gerais" "${UPLOAD_DIR}/recibos" /app/logs
-chown -R spring:spring "${UPLOAD_DIR}" /app/logs 2>/dev/null || true
+echo "Diretórios criados em ${UPLOAD_DIR}"
 
-exec su-exec spring java \
+exec java \
   -XX:+UseContainerSupport \
   -XX:MaxRAMPercentage=60.0 \
   -XX:InitialRAMPercentage=30.0 \
