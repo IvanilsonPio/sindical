@@ -18,13 +18,15 @@ WORKDIR /app
 
 # Create non-root user and directories with correct ownership
 RUN addgroup -S spring && adduser -S spring -G spring \
-    && mkdir -p /app/uploads /app/logs \
+    && mkdir -p /app/uploads/arquivos-gerais /app/logs \
     && chown -R spring:spring /app
 
 USER spring:spring
 
 # Copy the built JAR from build stage
 COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
+COPY --chown=spring:spring docker-entrypoint.sh docker-entrypoint.sh
+RUN chmod +x docker-entrypoint.sh
 
 # Expose application port
 EXPOSE 8080
@@ -34,12 +36,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
 # Run the application
-ENTRYPOINT ["java", \
-  "-XX:+UseContainerSupport", \
-  "-XX:MaxRAMPercentage=75.0", \
-  "-XX:+UseG1GC", \
-  "-Djava.security.egd=file:/dev/./urandom", \
-  "-Dspring.jmx.enabled=false", \
-  "-Dspring.profiles.active=prod", \
-  "-jar", \
-  "app.jar"]
+ENTRYPOINT ["./docker-entrypoint.sh"]

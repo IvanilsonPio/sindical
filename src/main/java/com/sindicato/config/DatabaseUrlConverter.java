@@ -1,12 +1,12 @@
 package com.sindicato.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Converte DATABASE_URL no formato postgres:// (injetado pelo Fly.io)
@@ -24,7 +24,7 @@ public class DatabaseUrlConverter implements ApplicationContextInitializer<Confi
         ConfigurableEnvironment env = applicationContext.getEnvironment();
         String databaseUrl = env.getProperty("DATABASE_URL");
 
-        if (databaseUrl == null || databaseUrl.startsWith("jdbc:")) {
+        if (databaseUrl == null || databaseUrl.isBlank() || databaseUrl.startsWith("jdbc:")) {
             return; // Já está no formato correto ou não existe
         }
 
