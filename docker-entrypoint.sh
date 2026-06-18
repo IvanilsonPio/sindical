@@ -3,25 +3,8 @@ set -e
 
 UPLOAD_DIR="${FILE_UPLOAD_DIR:-/data/uploads}"
 
-# Aguarda o volume ser montado pelo Railway via /proc/mounts
-echo "Aguardando montagem do volume em ${UPLOAD_DIR}..."
-i=0
-while [ $i -lt 60 ]; do
-  if grep -q "${UPLOAD_DIR}" /proc/mounts 2>/dev/null; then
-    echo "Volume montado em ${UPLOAD_DIR}"
-    break
-  fi
-  sleep 1
-  i=$((i + 1))
-done
-
-if [ $i -eq 60 ]; then
-  echo "Timeout aguardando volume. Continuando..."
-fi
-
-# Cria subdiretórios (rodando como root, tem permissão total no volume)
+# Cria subdiretórios no volume (já montado antes do container iniciar)
 mkdir -p "${UPLOAD_DIR}/arquivos-gerais" "${UPLOAD_DIR}/recibos" /app/logs
-echo "Diretórios criados em ${UPLOAD_DIR}"
 
 exec java \
   -XX:+UseContainerSupport \
