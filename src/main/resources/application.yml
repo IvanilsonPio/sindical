@@ -151,6 +151,9 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: false
+
+  main:
+    lazy-initialization: true
   server:
     undertow:
       threads:
