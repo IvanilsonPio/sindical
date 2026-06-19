@@ -50,6 +50,11 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
+# Resend API - email via HTTPS (contorna bloqueio de SMTP no Railway)
+resend:
+  api-key: ${RESEND_API_KEY:}
+  from: ${RESEND_FROM:noreply@sindicato.com}
+
 # Actuator Configuration - apenas health para reduzir overhead de métricas
 management:
   endpoints:
