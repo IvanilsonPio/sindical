@@ -153,7 +153,6 @@ spring:
           time_zone: America/Sao_Paulo
         temp:
           use_jdbc_metadata_defaults: false
-    bootstrap-mode: lazy
 
   main:
     lazy-initialization: false
