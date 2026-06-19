@@ -31,7 +31,7 @@ COPY --chown=spring:spring docker-entrypoint.sh docker-entrypoint.sh
 RUN chmod +x docker-entrypoint.sh
 
 # Expose application port
-EXPOSE 8080
+EXPOSE ${PORT:-8080}
 
 # Run the application
 ENTRYPOINT ["./docker-entrypoint.sh"]

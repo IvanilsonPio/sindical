@@ -15,4 +15,5 @@ exec java \
   -Djava.security.egd=file:/dev/./urandom \
   -Dspring.jmx.enabled=false \
   -Dspring.profiles.active=prod \
+  -Dserver.port="${PORT:-8080}" \
   -jar app.jar "$@"
