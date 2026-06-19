@@ -156,11 +156,12 @@ spring:
 
   main:
     lazy-initialization: true
-  server:
-    undertow:
-      threads:
-        worker: 20
-        io: 2
+
+server:
+  undertow:
+    threads:
+      worker: 20
+      io: 2
 
 logging:
   level:

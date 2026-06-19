@@ -3,6 +3,8 @@ set -e
 
 UPLOAD_DIR="${FILE_UPLOAD_DIR:-/data/uploads}"
 
+echo "=== PORT=${PORT} FILE_UPLOAD_DIR=${UPLOAD_DIR} ==="
+
 # Cria subdiretórios no volume (já montado antes do container iniciar)
 mkdir -p "${UPLOAD_DIR}/arquivos-gerais" "${UPLOAD_DIR}/recibos" /app/logs
 
