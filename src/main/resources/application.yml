@@ -63,6 +63,8 @@ management:
   health:
     defaults:
       enabled: true
+    mail:
+      enabled: false
   metrics:
     enable:
       all: false
