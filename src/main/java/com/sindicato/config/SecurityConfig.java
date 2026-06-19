@@ -3,6 +3,7 @@ package com.sindicato.config;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,6 +38,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SecurityConfig {
     
     private final UserDetailsService userDetailsService;
+
+    @Value("${app.frontend-url:http://localhost:4200}")
+    private String frontendUrl;
 
     public SecurityConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
@@ -183,7 +187,8 @@ public class SecurityConfig {
         // Permite origens específicas (ajustar conforme ambiente)
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:4200",  // Angular dev server
-                "http://localhost:8080"   // Produção local
+                "http://localhost:8080",  // Produção local
+                frontendUrl              // URL configurada via FRONTEND_URL env var
         ));
         
         // Permite métodos HTTP
