@@ -119,6 +119,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/health/**",
+                                "/actuator/health",
+                                "/actuator",
+                                "/healthz",
                                 "/api/usuarios/recuperar-senha/**",
                                 "/error"
                         ).permitAll()
