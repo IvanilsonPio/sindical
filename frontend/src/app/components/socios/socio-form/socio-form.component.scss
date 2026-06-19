@@ -295,16 +295,16 @@ mat-select:focus-visible {
 }
 
 /* Ensure proper tab order - all interactive elements should be focusable */
-button,
-input,
-select,
-textarea {
-  &:not([tabindex="-1"]) {
-    &:focus-visible {
-      outline: 2px solid #1976d2;
-      outline-offset: 2px;
-    }
-  }
+button:not([tabindex="-1"]):focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+/* inputs e selects dentro do Material não precisam de outline — o mat-form-field já cuida disso */
+input:not([tabindex="-1"]):focus-visible,
+select:not([tabindex="-1"]):focus-visible,
+textarea:not([tabindex="-1"]):focus-visible {
+  outline: none;
 }
 
 /* Disabled elements should not show focus */
