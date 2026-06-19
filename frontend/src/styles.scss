@@ -102,6 +102,15 @@ button[color="accent"]:focus-visible,
   outline-offset: 2px;
 }
 
+/* Angular Material inputs gerenciam seu próprio foco via borda do mat-form-field */
+.mat-mdc-input-element:focus,
+.mat-mdc-input-element:focus-visible,
+.mdc-text-field__input:focus,
+.mdc-text-field__input:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* Ensure disabled elements don't show focus */
 button:disabled:focus,
 input:disabled:focus,
