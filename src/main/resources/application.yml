@@ -155,7 +155,7 @@ spring:
     show-sql: false
 
   main:
-    lazy-initialization: true
+    lazy-initialization: false
 
 server:
   undertow:
