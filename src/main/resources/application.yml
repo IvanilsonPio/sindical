@@ -157,10 +157,12 @@ server:
 
 logging:
   level:
-    com.sindicato: INFO
+    com.sindicato: DEBUG
     org.springframework.security: WARN
     org.hibernate: WARN
     org.flywaydb: WARN
+    org.springframework.context: DEBUG
+    org.springframework.beans: DEBUG
 
 ---
 # Test Profile
