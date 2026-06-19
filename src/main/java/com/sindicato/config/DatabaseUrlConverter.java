@@ -39,9 +39,9 @@ public class DatabaseUrlConverter implements ApplicationContextInitializer<Confi
             String password = userInfo.contains(":") ? userInfo.substring(userInfo.indexOf(':') + 1) : "";
 
             String jdbcUrl = "jdbc:postgresql://" + rest;
-            // Garante sslmode=disable para rede interna do Fly.io
+            // Railway requer sslmode=require para conexões públicas
             if (!jdbcUrl.contains("sslmode")) {
-                jdbcUrl += (jdbcUrl.contains("?") ? "&" : "?") + "sslmode=disable";
+                jdbcUrl += (jdbcUrl.contains("?") ? "&" : "?") + "sslmode=require";
             }
 
             Map<String, Object> props = new HashMap<>();
