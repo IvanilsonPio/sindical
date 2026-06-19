@@ -18,6 +18,21 @@ body {
   outline: none;
 }
 
+/* Cobre também shadow DOM e pseudo-elementos internos do MDC/Angular Material */
+:root {
+  --mdc-outlined-text-field-focus-outline-color: transparent;
+}
+
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* Restaura indicador de foco apenas para navegação por teclado em elementos não-Material */
 button:focus-visible,
 a:focus-visible {
