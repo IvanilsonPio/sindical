@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -52,13 +53,13 @@ public class ArquivoService {
     public ArquivoService(
             ArquivoRepository arquivoRepository,
             SocioRepository socioRepository,
-            AuditService auditService) {
-        // FILE_STORAGE_DISABLED: @Value uploadDir removed, no directory creation on startup.
+            AuditService auditService,
+            @Value("${file.upload-dir:${java.io.tmpdir}/sindicato/uploads}") String uploadDir) {
         this.arquivoRepository = arquivoRepository;
         this.socioRepository = socioRepository;
         this.auditService = auditService;
-        this.fileStorageLocation = Paths.get(System.getProperty("java.io.tmpdir"), "sindicato", "uploads")
-            .toAbsolutePath().normalize();
+        this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
+        logger.info("Storage location: {}", this.fileStorageLocation);
     }
     
     /**

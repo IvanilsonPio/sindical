@@ -67,6 +67,10 @@ jwt:
 app:
   frontend-url: ${FRONTEND_URL:http://localhost:4200}
 
+# File Storage Configuration
+file:
+  upload-dir: ${FILE_UPLOAD_DIR:${java.io.tmpdir}/sindicato/uploads}
+
 # FILE_STORAGE_DISABLED: file.upload-dir removed
 
 # Logging Configuration
