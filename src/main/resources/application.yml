@@ -145,6 +145,15 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        jdbc:
+          time_zone: America/Sao_Paulo
+        temp:
+          use_jdbc_metadata_defaults: false
+    bootstrap-mode: lazy
 
   main:
     lazy-initialization: false
@@ -157,12 +166,10 @@ server:
 
 logging:
   level:
-    com.sindicato: DEBUG
+    com.sindicato: INFO
     org.springframework.security: WARN
     org.hibernate: WARN
     org.flywaydb: WARN
-    org.springframework.context: DEBUG
-    org.springframework.beans: DEBUG
 
 ---
 # Test Profile
