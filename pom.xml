@@ -138,11 +138,12 @@
             <version>9.3.2</version>
         </dependency>
 
-        <!-- Email -->
+        <!-- Email - DISABLED for Railway deployment
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
+        -->
     </dependencies>
 
     <build>

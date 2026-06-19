@@ -12,7 +12,6 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -53,33 +52,13 @@ public class ArquivoService {
     public ArquivoService(
             ArquivoRepository arquivoRepository,
             SocioRepository socioRepository,
-            AuditService auditService,
-            @Value("${file.upload-dir:./uploads}") String uploadDir) {
-        
+            AuditService auditService) {
+        // FILE_STORAGE_DISABLED: @Value uploadDir removed, no directory creation on startup.
         this.arquivoRepository = arquivoRepository;
         this.socioRepository = socioRepository;
         this.auditService = auditService;
-        this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
-        
-        try {
-            Files.createDirectories(this.fileStorageLocation);
-            logger.info("Diretório de armazenamento criado/verificado: {}", this.fileStorageLocation);
-        } catch (IOException ex) {
-            logger.warn("Não foi possível criar o diretório {}: {}. Tentando diretório temporário.",
-                this.fileStorageLocation, ex.getMessage());
-            this.fileStorageLocation = Paths.get(System.getProperty("java.io.tmpdir"), "sindicato", "uploads")
-                .toAbsolutePath().normalize();
-            try {
-                Files.createDirectories(this.fileStorageLocation);
-                logger.info("Usando diretório temporário: {}", this.fileStorageLocation);
-            } catch (IOException ex2) {
-                logger.error("Erro ao criar diretório temporário: {}", this.fileStorageLocation, ex2);
-                throw new BusinessException(
-                    "FILE_STORAGE_INIT_ERROR",
-                    "Não foi possível criar o diretório de armazenamento de arquivos"
-                );
-            }
-        }
+        this.fileStorageLocation = Paths.get(System.getProperty("java.io.tmpdir"), "sindicato", "uploads")
+            .toAbsolutePath().normalize();
     }
     
     /**

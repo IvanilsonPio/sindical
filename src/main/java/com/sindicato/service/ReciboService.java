@@ -5,16 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.xhtmlrenderer.pdf.ITextRenderer;
@@ -44,8 +40,7 @@ public class ReciboService {
         "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
     };
 
-    @Value("${file.upload-dir:./uploads}")
-    private String uploadDir;
+    // FILE_STORAGE_DISABLED: uploadDir removed, gerarESalvarRecibo and carregarRecibo disabled.
 
     private final PagamentoRepository pagamentoRepository;
 
@@ -81,52 +76,22 @@ public class ReciboService {
 
     /**
      * Generates and saves a PDF receipt permanently.
-     * Implements requirement 4.4: Permanent storage of receipts.
+     * FILE_STORAGE_DISABLED: saving to disk is disabled.
      */
     @Transactional
     public String gerarESalvarRecibo(Long pagamentoId) {
-        logger.info("Generating and saving receipt for payment: {}", pagamentoId);
-
-        Pagamento pagamento = pagamentoRepository.findById(pagamentoId)
-                .orElseThrow(() -> new ResourceNotFoundException("Pagamento", "id", pagamentoId));
-
-        try {
-            byte[] pdfBytes = criarPdfRecibo(pagamento, false);
-
-            Path recibosDir = Paths.get(uploadDir).resolve("recibos").toAbsolutePath().normalize();
-            Files.createDirectories(recibosDir);
-
-            String fileName = String.format("recibo-%s.pdf", pagamento.getNumeroRecibo());
-            Path filePath = recibosDir.resolve(fileName);
-            Files.write(filePath, pdfBytes);
-            logger.info("Receipt saved successfully at: {}", filePath);
-
-            String relativePath = "recibos/" + fileName;
-            pagamento.setCaminhoRecibo(relativePath);
-            pagamentoRepository.save(pagamento);
-
-            return relativePath;
-        } catch (Exception e) {
-            logger.error("Error generating and saving PDF receipt for payment: {}", pagamentoId, e);
-            throw new RuntimeException("Erro ao gerar e salvar recibo em PDF", e);
-        }
+        // FILE_STORAGE_DISABLED: receipt is generated in memory but not saved to disk.
+        logger.warn("Receipt saving is disabled (FILE_STORAGE_DISABLED). Payment: {}", pagamentoId);
+        return null;
     }
 
     /**
      * Loads a saved receipt from disk.
-     * Implements requirement 4.5: Allow download and reprint of receipts.
+     * FILE_STORAGE_DISABLED: loading from disk is disabled.
      */
     public byte[] carregarRecibo(String caminhoRecibo) throws IOException {
-        logger.info("Loading receipt from: {}", caminhoRecibo);
-
-        Path filePath = Paths.get(uploadDir).resolve(caminhoRecibo).toAbsolutePath().normalize();
-
-        if (!Files.exists(filePath)) {
-            logger.warn("Receipt file not found: {}", filePath);
-            throw new ResourceNotFoundException("Recibo", "caminho", caminhoRecibo);
-        }
-
-        return Files.readAllBytes(filePath);
+        // FILE_STORAGE_DISABLED: cannot load receipts from disk.
+        throw new ResourceNotFoundException("Recibo", "caminho", caminhoRecibo);
     }
 
     // -------------------------------------------------------------------------

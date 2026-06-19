@@ -32,21 +32,11 @@ spring:
       max-file-size: 10MB
       max-request-size: 50MB
 
-  mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:ivanilsonpio@gmail.com}
-    password: ${MAIL_PASSWORD:eeos eoyi jzwy twwc}
-    test-connection: false
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
+  # MAIL_DISABLED: JavaMailSender autoconfiguration disabled to prevent SMTP connection on startup
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
+      - org.springframework.boot.autoconfigure.mail.MailSenderValidatorAutoConfiguration
 
 # Actuator Configuration - apenas health para reduzir overhead de métricas
 management:
@@ -75,9 +65,7 @@ jwt:
 app:
   frontend-url: ${FRONTEND_URL:http://localhost:4200}
 
-# File Storage Configuration
-file:
-  upload-dir: ${FILE_UPLOAD_DIR:./uploads}
+# FILE_STORAGE_DISABLED: file.upload-dir removed
 
 # Logging Configuration
 logging:
