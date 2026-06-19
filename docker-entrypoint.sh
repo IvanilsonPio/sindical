@@ -3,10 +3,11 @@ set -e
 
 exec java \
   -XX:+UseContainerSupport \
-  -XX:MaxRAMPercentage=60.0 \
-  -XX:InitialRAMPercentage=30.0 \
+  -Xmx256m \
+  -Xms64m \
+  -XX:MaxMetaspaceSize=96m \
   -XX:+UseSerialGC \
-  -XX:MaxMetaspaceSize=128m \
+  -XX:CompressedClassSpaceSize=32m \
   -Djava.security.egd=file:/dev/./urandom \
   -Dspring.jmx.enabled=false \
   -Dspring.profiles.active=prod \
