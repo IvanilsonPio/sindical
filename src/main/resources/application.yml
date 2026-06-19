@@ -37,12 +37,16 @@ spring:
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:ivanilsonpio@gmail.com}
     password: ${MAIL_PASSWORD:eeos eoyi jzwy twwc}
+    test-connection: false
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 # Actuator Configuration - apenas health para reduzir overhead de métricas
 management:
