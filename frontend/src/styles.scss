@@ -45,6 +45,11 @@ a:focus-visible {
   box-shadow: none !important;
 }
 
+/* Remove border-left do notch que aparece como linha vertical */
+.mdc-notched-outline__notch {
+  border-left: none !important;
+}
+
 tr:focus-visible,
 td:focus-visible,
 th:focus-visible {
