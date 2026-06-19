@@ -33,9 +33,5 @@ RUN chmod +x docker-entrypoint.sh
 # Expose application port
 EXPOSE 8080
 
-# Health check - start-period allows time for JVM and Spring to fully start
-HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
-
 # Run the application
 ENTRYPOINT ["./docker-entrypoint.sh"]
