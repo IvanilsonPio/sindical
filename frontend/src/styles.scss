@@ -34,12 +34,19 @@ a:focus-visible {
   outline-offset: 2px;
 }
 
-/* Focus styles for form inputs */
-input:focus-visible,
-textarea:focus-visible,
+/* Focus styles for form inputs - apenas para inputs fora do Angular Material */
+input:focus-visible:not(.mat-mdc-input-element),
+textarea:focus-visible:not(.mat-mdc-input-element),
 select:focus-visible {
   outline: 2px solid #1976d2;
   outline-offset: 2px;
+}
+
+/* Remove outline padrão do browser nos inputs do Angular Material */
+.mat-mdc-input-element:focus-visible,
+.mat-mdc-form-field input:focus-visible,
+.mat-mdc-form-field textarea:focus-visible {
+  outline: none;
 }
 
 /* Focus styles for Material form fields */
